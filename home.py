@@ -1397,8 +1397,8 @@ if selecionar == 'Análise Tecnica':
         dados['Disperção 42 preço'] = dados['Adj Close'].iloc[-1]*dados['Dispersão 42 periodos'].iloc[-1]
 
         st.warning(f"Ativo : {ativos} Preço :{dados['Adj Close'].iloc[-1]:,.2f}")
-        st.warning(f"Ativo : {ativos} ----Média de 42 periodos :{dados['SMA 42'].iloc[-1]:,.2f},---Dispersão maxima : {dados['Dispersão 42 periodos'].max()*100:,.2f}---%Dispersão minima : {dados['Dispersão 42 periodos'].min()*100:,.2f}%---Dispersão media : {dados['Dispersão 42 periodos'].mean()*100:,.2f}%---Disperção atual :{dados['Dispersão 42 periodos'].iloc[-1]*100:,.2f}%")
-        st.warning(f"Ativo : {ativos} ---- Média de 21 periodos :{dados['SMA 21'].iloc[-1]:,.2f},--- Dispersão maxima : {dados['Dispersão 21 periodos'].max()*100:,.2f}%,--- Dispersão minima : {dados['Dispersão 21 periodos'].min()*100:,.2f}%---Dispersão media  : {dados['Dispersão 21 periodos'].mean()*100:,.2f}%----  Disperção  atual :{dados['Dispersão 21 periodos'].iloc[-1]*100:,.2f}%")
+        st.warning(f" Média de 42 periodos :{dados['SMA 42'].iloc[-1]:,.2f}---Dispersão maxima : {dados['Dispersão 42 periodos'].max()*100:,.2f}%---Dispersão minima : {dados['Dispersão 42 periodos'].min()*100:,.2f}%---Dispersão media : {dados['Dispersão 42 periodos'].mean()*100:,.2f}%---Disperção atual :{dados['Dispersão 42 periodos'].iloc[-1]*100:,.2f}%")
+        st.warning(f" Média de 21 periodos :{dados['SMA 21'].iloc[-1]:,.2f},--- Dispersão maxima : {dados['Dispersão 21 periodos'].max()*100:,.2f}%,--- Dispersão minima : {dados['Dispersão 21 periodos'].min()*100:,.2f}%---Dispersão media  : {dados['Dispersão 21 periodos'].mean()*100:,.2f}%----  Disperção  atual :{dados['Dispersão 21 periodos'].iloc[-1]*100:,.2f}%")
         
 
         graficos = go.Figure()

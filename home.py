@@ -1348,7 +1348,7 @@ if selecionar == 'Analitico':
         print(ativo,media_21,media_42)
 
 if selecionar == 'Análise Tecnica':
-    st.header("Disperção dos ativos")       
+    st.header("Dispersão dos ativos")       
     lista_acoes_em_caixa = [
         'ARZZ3',
         'ASAI3',

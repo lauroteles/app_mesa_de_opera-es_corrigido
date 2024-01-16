@@ -22,13 +22,13 @@ t0 = time.perf_counter()
 
 st.set_page_config(layout='wide')
 
-paginas = 'Home','Carteiras','Produtos','Divisão de operadores','Analitico'
+paginas = 'Home','Carteiras','Produtos','Divisão de operadores','Analitico','Análise Tecnica'
 selecionar = st.sidebar.radio('Selecione uma opção', paginas)
 
 
 #---------------------------------- 
 # Variaveis globais
-@st.cache_data(ttl="2m")
+@st.cache_data(ttl="1d")
      
 def le_excel(x):
     df = pd.read_excel(x)
@@ -48,28 +48,6 @@ arquivo1 = posicao_original.copy()
 produtos = produtos_original.copy()
 curva_base = cura_original.copy()
 curva_inflacao_copia = curva_de_inflacao.copy()
-
-botao_cache = st.button('Atualizar dados')
-if botao_cache:
-
-    pl_original = le_excel('PL Total.xlsx')
-    controle_original = le_excel('controle.xlsx')
-    saldo_original = le_excel('Saldo.xlsx')
-    posicao_original = le_excel('Posição.xlsx')
-    produtos_original = le_excel('Produtos.xlsx')
-    cura_original = le_excel('Curva_comdinheiro.xlsx')
-    curva_de_inflacao = le_excel('Curva_inflação.xlsx')
-
-    pl = pl_original.copy()
-    controle = controle_original.copy()
-    saldo = saldo_original.copy()
-    arquivo1 = posicao_original.copy()
-    produtos = produtos_original.copy()
-    curva_base = cura_original.copy()
-    curva_inflacao_copia = curva_de_inflacao.copy()
-
-
-
 
 
 #----------------------------------  ---------------------------------- ---------------------------------- ---------------------------------- 
@@ -512,17 +490,12 @@ if selecionar == 'Carteiras':
 
 
         somatario_basket = basket.copy()
-        try:
-            if 'V' in somatario_basket['C/V'].values:
-                somatario_basket['Venda'] = somatario_basket['Quantidade']*somatario_basket['Preço']
-        except:
-            pass 
-        try:           
-            if 'C' in somatario_basket['C/V'].values:
-                somatario_basket['Compra'] = somatario_basket['Quantidade']*somatario_basket['Preço']
-        except:
-            pass
-     
+        compra = somatario_basket[somatario_basket['C/V']=='C']
+        compra['valor'] = compra['Quantidade']*compra['Preço']
+
+        venda = somatario_basket[somatario_basket['C/V']=='V']
+        venda['valor'] = venda['Quantidade']*venda['Preço']
+
         #----------------------------------------------
         #---------------------- Streamlit visualization
 
@@ -543,11 +516,11 @@ if selecionar == 'Carteiras':
             with col1:''
             st.subheader('Basket')
             try:
-                st.warning(f' O saldo gerado pelas vendas vai ser de : {somatario_basket["Venda"].sum():,.2f}')
+                st.warning(f' O saldo gerado pelas vendas  : {venda["valor"].iloc[-1]:,.2f}')
             except:
                 pass
-            try:   
-                st.warning(f' O saldo Nescessario para e de : {somatario_basket["Compra"].sum():,.2f}')          
+            try:
+                st.warning(f' O saldo Nescessario para compra : {compra["valor"].iloc[-1]:,.2f}')          
             except:
                 pass
             st.dataframe(basket,use_container_width=True)
@@ -1206,7 +1179,8 @@ if selecionar == 'Analitico':
                  'rgb(175, 49, 35)', 'rgb(36, 73, 147)']
     cafe_colors =  ['rgb(146, 123, 21)', 'rgb(177, 180, 34)', 'rgb(206, 206, 40)',
                 'rgb(175, 51, 21)', 'rgb(35, 36, 21)']
-    lista_acoes_em_caixa = ['ARZZ3',
+    lista_acoes_em_caixa = [
+            'ARZZ3',
             'ASAI3',
             'CSAN3',
             'CSED3',
@@ -1348,11 +1322,98 @@ if selecionar == 'Analitico':
         with col2:st.dataframe(carteira_MOD_PREV_MOD)
 
 
-
-
+    ativos_e_dispercoes = []
+    def obter_dados(ativo,start_dt,end_dt, numero_periodo):
+        data = yf.download(ativo+'.SA',start=start_dt,end=end_dt,period='1d')
+        return data['Close'].tail(numero_periodo)
+    
     
 
+    def calcular_media(ativo,inicio,fim):
+        dados = obter_dados(ativo,inicio,fim,40)
+
+        media_21 = dados.rolling(window=21).mean()
+        media_42 = dados.rolling(window=42).mean()
+
+        return media_21,media_42
     
+
+    data_atual = pd.to_datetime('today').strftime('%Y-%m-%d')
+    vinte_e_um_DIAS = (pd.to_datetime('today')-pd.DateOffset(days=21)).strftime('%Y-%m-%d')
+    quarenta_e_dois = (pd.to_datetime('today')-pd.DateOffset(days=42)).strftime('%Y-%m-%d')
+
+    for ativo in lista_acoes_em_caixa:
+        media_21,media_42 = calcular_media(ativo,quarenta_e_dois,data_atual)
+    
+        print(ativo,media_21,media_42)
+
+if selecionar == 'Análise Tecnica':
+    st.header("Disperção dos ativos")       
+    lista_acoes_em_caixa = [
+        'ARZZ3',
+        'ASAI3',
+        'CSAN3',
+        'CSED3',
+        'EGIE3',
+        'EQTL3',
+        'EZTC3',
+        'HYPE3',
+        'KEPL3',
+        'MULT3',
+        'PRIO3',
+        'PSSA3',
+        'SBSP3',
+        'SLCE3',
+        'VALE3']
+
+
+    data_atual = pd.to_datetime('today').strftime('%Y-%m-%d')
+    vinte_e_um_DIAS = (pd.to_datetime('today')-pd.DateOffset(days=21)).strftime('%Y-%m-%d')
+    quarenta_e_dois = (pd.to_datetime('today')-pd.DateOffset(days=755)).strftime('%Y-%m-%d')
+
+
+
+    graficos = go.Figure()
+
+    ativos_e_dispercoes = []
+    try:
+        def obter_dados(ativo,start_dt,end_dt,):
+            data = yf.download(ativo+'.SA',start=start_dt,end=end_dt,period='1d')
+            return data
+    except:
+        st.warning('Problema com os dados')
+    for ativos in lista_acoes_em_caixa:
+
+        ticker = obter_dados(ativos,quarenta_e_dois,data_atual)
+        ticker['Ativo'] = ativos
+        dados = ticker[ticker['Ativo']==ativos]
+        dados = dados.dropna()
+        dados['SMA 42'] = dados['Adj Close'].ewm(span=42,adjust=False).mean()
+        dados['SMA 21'] = dados['Adj Close'].ewm(span=21,adjust=False).mean()
+
+        dados['Dispersão 42 periodos'] = (dados['Adj Close']/dados['SMA 42'])-1
+        dados['Dispersão 21 periodos'] = (dados['Adj Close']/dados['SMA 21'])-1
+
+        dados['Disperção 42 preço'] = dados['Adj Close'].iloc[-1]*dados['Dispersão 42 periodos'].iloc[-1]
+
+        st.warning(f"Ativo : {ativos} Preço :{dados['Adj Close'].iloc[-1]:,.2f}")
+        st.warning(f"Ativo : {ativos} ----Média de 42 periodos :{dados['SMA 42'].iloc[-1]:,.2f},---Dispersão maxima : {dados['Dispersão 42 periodos'].max()*100:,.2f}---%Dispersão minima : {dados['Dispersão 42 periodos'].min()*100:,.2f}%---Dispersão media : {dados['Dispersão 42 periodos'].mean()*100:,.2f}%---Disperção atual :{dados['Dispersão 42 periodos'].iloc[-1]*100:,.2f}%")
+        st.warning(f"Ativo : {ativos} ---- Média de 21 periodos :{dados['SMA 21'].iloc[-1]:,.2f},--- Dispersão maxima : {dados['Dispersão 21 periodos'].max()*100:,.2f}%,--- Dispersão minima : {dados['Dispersão 21 periodos'].min()*100:,.2f}%---Dispersão media  : {dados['Dispersão 21 periodos'].mean()*100:,.2f}%----  Disperção  atual :{dados['Dispersão 21 periodos'].iloc[-1]*100:,.2f}%")
+        
+
+        graficos = go.Figure()
+        graficos.add_trace(go.Scatter(x=dados.index, y=dados['Adj Close'], mode='lines', line=dict(width=3,color='orange'), name=f'{ativos} - Preço'))
+        graficos.add_trace(go.Scatter(x=dados.index, y=dados['SMA 42'], mode='lines', name=f'{ativos} - SMA 42'))
+        graficos.add_trace(go.Scatter(x=dados.index, y=dados['SMA 21'], mode='lines', name=f'{ativos} - SMA 21'))
+
+        graficos.update_layout(title=f'{ativos} - Metrics Comparison',
+                            xaxis_title='Data',
+                            yaxis_title='Valor',
+                            legend=dict(x=0, y=1, traceorder='normal'))
+
+
+        st.plotly_chart(graficos,use_container_width=True)
+
 
 
 

@@ -28,7 +28,7 @@ selecionar = st.sidebar.radio('Selecione uma opção', paginas)
 
 #---------------------------------- 
 # Variaveis globais
-@st.cache_data(ttl="1d")
+@st.cache_data(ttl="2m")
      
 def le_excel(x):
     df = pd.read_excel(x)

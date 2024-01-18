@@ -28,7 +28,7 @@ selecionar = st.sidebar.radio('Selecione uma opção', paginas)
 
 #---------------------------------- 
 # Variaveis globais
-@st.cache_data(ttl="2m")
+@st.cache_data(ttl="1d")
      
 def le_excel(x):
     df = pd.read_excel(x)
@@ -313,38 +313,12 @@ if selecionar == 'Carteiras':
         analise_rvrf = novo_arq[~novo_arq['PRODUTO'].isin(lista_acoes)].sum().reset_index()
 
 
-        # renda_v_vs_rf = pd.concat([filtro_total_rvrf,analise_rvrf],axis=0).reset_index()
-        # renda_v_vs_rf.drop([0,2,3,4,6,7],inplace=True)
-        # renda_v_vs_rf = renda_v_vs_rf.rename(columns={
-        #     'index':'PRODUTO',0:'VALOR LÍQUIDO'
-        #                     }).reset_index()
-        # renda_v_vs_rf.at[0,'PRODUTO'] = 'Renda Variavel'
-        # renda_v_vs_rf.at[1,'PRODUTO'] = 'Renda Fixa'
-        # renda_v_vs_rf = renda_v_vs_rf[[
-        #     'PRODUTO','VALOR LÍQUIDO']]
-            
-
-
-        # ideal_proporção_rf = moderada_graf[moderada_graf['Ativo'].isin(lista_acoes)].sum().reset_index()
-        # ideal_proporção_rv = moderada_graf[~moderada_graf['Ativo'].isin(lista_acoes)].sum().reset_index()
-
-        # ideal_porporção = pd.concat([ideal_proporção_rf,ideal_proporção_rv],axis=0).reset_index()
-        # ideal_porporção.drop([0,2,3,5],inplace=True)
-        # ideal_porporção.drop(columns='level_0')
-        # ideal_porporção = ideal_porporção.rename(columns={
-        #     'index':'Ativo',0:'Proporção'
-        # })       
-        # ideal_porporção.at[1,'Ativo'] = 'Renda Variável'
-        # ideal_porporção.at[4,'Ativo'] = 'Renda Fixa'
-        # ideal_porporção=ideal_porporção[['Ativo','Proporção']].reset_index()
-        # ideal_porporção=ideal_porporção[['Ativo','Proporção']]
-
         st.markdown("<br>",unsafe_allow_html=True)
         st.markdown("<br>",unsafe_allow_html=True)
         mostrar_rv = st.toggle('Mostrar apenas renda variavel')
         mostrar_rf = st.toggle('Mostrar apenas renda fixa')
         st.markdown("<br>",unsafe_allow_html=True)
-        #mostrarvxrf = st.toggle('Mostrar proporção Renda Fixa x Renda Variável')
+
 
         
         if mostrar_rv and mostrar_rf:
@@ -365,14 +339,6 @@ if selecionar == 'Carteiras':
             novo_arq = novo_arq
             moderada_graf = moderada_graf
             arquivo_basket = arquivo_basket            
-
-        # elif mostrarvxrf:
-        #     novo_arq  =  renda_v_vs_rf
-        #     moderada_graf = ideal_porporção
-        #     arquivo_basket = ideal_porporção
-
-        
-
 
 
         #---------------------------
@@ -1348,7 +1314,7 @@ if selecionar == 'Analitico':
         print(ativo,media_21,media_42)
 
 if selecionar == 'Análise Tecnica':
-    st.header("Dispersão dos ativos")       
+    st.header("Disperção dos ativos")       
     lista_acoes_em_caixa = [
         'ARZZ3',
         'ASAI3',

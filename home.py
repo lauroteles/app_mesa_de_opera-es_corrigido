@@ -28,7 +28,7 @@ selecionar = st.sidebar.radio('Selecione uma opção', paginas)
 
 #---------------------------------- 
 # Variaveis globais
-@st.cache_data(ttl="2m")
+@st.cache_data(ttl="1d")
      
 def le_excel(x):
     df = pd.read_excel(x)
@@ -458,6 +458,8 @@ if selecionar == 'Carteiras':
         somatario_basket = basket.copy()
         compra = somatario_basket[somatario_basket['C/V']=='C']
         compra['valor'] = compra['Quantidade']*compra['Preço']
+    
+        
 
         venda = somatario_basket[somatario_basket['C/V']=='V']
         venda['valor'] = venda['Quantidade']*venda['Preço']
@@ -482,11 +484,11 @@ if selecionar == 'Carteiras':
             with col1:''
             st.subheader('Basket')
             try:
-                st.warning(f' O saldo gerado pelas vendas  : {venda["valor"].iloc[-1]:,.2f}')
+                st.warning(f' O saldo gerado pelas vendas  : {venda["valor"].sum():,.2f}')
             except:
                 pass
             try:
-                st.warning(f' O saldo Nescessario para compra : {compra["valor"].iloc[-1]:,.2f}')          
+                st.warning(f' O saldo Nescessario para compra : {compra["valor"].sum():,.2f}')          
             except:
                 pass
             st.dataframe(basket,use_container_width=True)

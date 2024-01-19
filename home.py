@@ -28,11 +28,11 @@ selecionar = st.sidebar.radio('Selecione uma opção', paginas)
 
 #---------------------------------- 
 # Variaveis globais
-@st.cache_data(ttl="2m")
-     
+@st.cache_data(ttl='3m')     
 def le_excel(x):
     df = pd.read_excel(x)
     return df
+
 pl_original = le_excel('PL Total.xlsx')
 controle_original = le_excel('controle.xlsx')
 saldo_original = le_excel('Saldo.xlsx')
@@ -40,6 +40,8 @@ posicao_original = le_excel('Posição.xlsx')
 produtos_original = le_excel('Produtos.xlsx')
 cura_original = le_excel('Curva_comdinheiro.xlsx')
 curva_de_inflacao = le_excel('Curva_inflação.xlsx')
+posicao_btg1 = le_excel('Posição.xlsx')
+planilha_controle1 = le_excel('controle.xlsx')
 
 pl = pl_original.copy()
 controle = controle_original.copy()
@@ -48,6 +50,8 @@ arquivo1 = posicao_original.copy()
 produtos = produtos_original.copy()
 curva_base = cura_original.copy()
 curva_inflacao_copia = curva_de_inflacao.copy()
+posicao_btg = posicao_btg1.copy()
+planilha_controle = planilha_controle1.copy()
 
 
 #----------------------------------  ---------------------------------- ---------------------------------- ---------------------------------- 
@@ -66,14 +70,14 @@ equities = {'ARZZ3': 4.5,
             'EQTL3':6,
             'EZTC3':5.75,
             'HYPE3':6.50,
-            'KEPL3':6.50,
+            'KEPL3':7.50,
             'MULT3':5,
             'PRIO3':8,
             'PSSA3':5.50,
             'SBSP3':4.50,
-            'SLCE3':6.50,
+            'SLCE3':8.50,
             'VALE3':10,
-            'Caixa':10
+            'Caixa':7
             }
 equities_graf= pd.DataFrame(list(equities.items()),columns=['Ativo','Proporção'])
 equities_graf['Proporção'] =equities_graf['Proporção']/100
@@ -582,15 +586,17 @@ if selecionar == 'Produtos':
 
     radio = ['CDB','LCA','LCI','LC','Inflação','Inflação Implícita']
     lc =st.sidebar.radio('selecione o tipo de produto',radio)
-    
+
 
     if lc =='CDB':
         pre_pos =st.radio('',['PRÉ','PÓS'])
         produtos = produtos[(produtos['PRODUTO'].str.slice(0,3) == 'CDB')&(produtos['TAXA'].str.slice(0,4) != 'IPCA')&(produtos['TAXA'].str.slice(0,3) != 'CDI')]
         if pre_pos == 'PRÉ':
             produtos = produtos[produtos['PRODUTO'].str.slice(0,9) == 'CDB - PRÉ']
+
         elif pre_pos == 'PÓS':
            produtos=produtos[produtos['PRODUTO'].str.slice(0,9) == 'CDB - PÓS']  
+              
 
     elif lc == 'LCI':
         pre_pos =st.radio('',['PRÉ','PÓS'])
@@ -910,27 +916,27 @@ if selecionar == 'Divisão de operadores':
     # Filtros para adicionar operadores
 
         #Filtro Breno
-        filtro = (arquivo_final['VALOR']<200000) & (arquivo_final['Operador']=='Edu')
+        filtro = (arquivo_final['VALOR']<250000) & (arquivo_final['Operador']=='Edu')
         arquivo_final.loc[filtro,'Operador'] ='Breno'
 
         #Filtro Edu
 
-        filtro2 =  filtro = (arquivo_final['VALOR']>200000) & (arquivo_final['Operador']=='Edu')
+        filtro2 =  filtro = (arquivo_final['VALOR']>250000) & (arquivo_final['Operador']=='Edu')
         arquivo_final.loc[filtro2,'Operador'] = 'Edu'
 
         #filtro Bruno
 
-        filtro4 = (arquivo_final['VALOR']<200000) & (arquivo_final['Operador']=='Léo')
+        filtro4 = (arquivo_final['VALOR']<250000) & (arquivo_final['Operador']=='Léo')
         arquivo_final.loc[filtro4,'Operador'] ='Bruno'
         
         # Filtro léo
-        filtro6  = (arquivo_final['VALOR']>200000) & (arquivo_final['Operador']=='Léo')
+        filtro6  = (arquivo_final['VALOR']>250000) & (arquivo_final['Operador']=='Léo')
         arquivo_final.loc[filtro6,'Operador'] = 'Léo'
 
-        filtro7 = (arquivo_final['VALOR']>200000)&(arquivo_final['Operador'] =='Breno')
+        filtro7 = (arquivo_final['VALOR']>250000)&(arquivo_final['Operador'] =='Breno')
         arquivo_final.loc[filtro7,'Operador'] = 'Edu'
 
-        filtro8 = (arquivo_final['VALOR']>200000)&(arquivo_final['Operador'] =='Bruno')
+        filtro8 = (arquivo_final['VALOR']>250000)&(arquivo_final['Operador'] =='Bruno')
         arquivo_final.loc[filtro8,'Operador'] = 'Léo'
 
         
@@ -1087,19 +1093,35 @@ if selecionar == 'Divisão de operadores':
 #---------------------------------- ---------------------------------- ---------------------------------- ---------------------------------- 
 if selecionar == 'Analitico':
 
-    arquivo2 = arquivo1.groupby(['CONTA','PRODUTO','ATIVO'])[['VALOR BRUTO','VALOR LÍQUIDO','QUANTIDADE']].sum().reset_index('CONTA')
+    # arquivo2 = arquivo1.groupby(['CONTA','PRODUTO','ATIVO'])[['VALOR BRUTO','VALOR LÍQUIDO','QUANTIDADE']].sum().reset_index('CONTA')
+
+    # arquivo_analise = arquivo2.groupby(['PRODUTO','CONTA'])[['VALOR BRUTO','QUANTIDADE']].sum().reset_index()
+    # controle = controle.iloc[:,[2,6,12]]
 
 
-    novo_arq = arquivo2.groupby(['PRODUTO','CONTA'])[['VALOR LÍQUIDO','QUANTIDADE']].sum().reset_index()
-    controle = controle.iloc[:,[2,6,12]]
-
-
-    controle['Unnamed: 2'] = controle['Unnamed: 2'].astype(str)
-    controle['Unnamed: 2'] = list(map(lambda x: '00' + x,controle['Unnamed: 2']))
+    # controle['Unnamed: 2'] = controle['Unnamed: 2'].astype(str)
+    # controle['Unnamed: 2'] = list(map(lambda x: '00' + x,controle['Unnamed: 2']))
         
-    juncao_arquivo_de_posicao_e_controle = pd.merge(controle,novo_arq, left_on='Unnamed: 2',right_on='CONTA', how= 'outer' )
+    # juncao_arquivo_de_posicao_e_controle = pd.merge(controle,arquivo_analise, left_on='Unnamed: 2',right_on='CONTA', how= 'outer' )
 
-    soma_dos_ativos_por_carteira = juncao_arquivo_de_posicao_e_controle.groupby(['Unnamed: 12','PRODUTO'])['VALOR LÍQUIDO'].sum().reset_index()
+    # soma_dos_ativos_por_carteira = juncao_arquivo_de_posicao_e_controle.groupby(['Unnamed: 12','PRODUTO'])['VALOR BRUTO'].sum().reset_index()
+
+
+
+    posicao_btg = posicao_original.iloc[:,[0,4,10]]
+    planilha_controle = controle.iloc[:,[2,12,]]
+
+
+    planilha_controle = planilha_controle.drop(0)
+    planilha_controle['Unnamed: 2'] =planilha_controle['Unnamed: 2'].map((lambda x: '00'+str(x))) 
+    planilha_final = pd.merge(posicao_btg,planilha_controle,left_on='CONTA',right_on='Unnamed: 2',how='outer').reset_index()
+
+
+    soma_dos_ativos_por_carteira = planilha_final.groupby(['Unnamed: 12','PRODUTO'])['VALOR BRUTO'].sum().reset_index()
+    
+  
+
+
 
     def criando_df_para_grafico(perfil_do_cliente):
       df = soma_dos_ativos_por_carteira[soma_dos_ativos_por_carteira['Unnamed: 12'] == perfil_do_cliente]
@@ -1127,13 +1149,25 @@ if selecionar == 'Analitico':
         carteira_dividendos,
         carteira_MOD_PREV_MOD,
         carteira_INC_PREV_MOD]
+    lista_remover_excecoes = [
+        carteira_inc,
+        carteira_mod,
+        carteira_arr,
+        carteira_equity,
+        carteira_FII,
+        carteira_small,
+        carteira_dividendos,
+        carteira_MOD_PREV_MOD,
+        carteira_INC_PREV_MOD]
 
-    carteira_inc['Porcentagem'] = (carteira_inc['VALOR LÍQUIDO']/carteira_inc['VALOR LÍQUIDO'].sum())*100
+    carteira_inc['Porcentagem'] = (carteira_inc['VALOR BRUTO']/carteira_inc['VALOR BRUTO'].sum())*100
 
     for dfs in lista_para_incluir_coluna_de_porcentagem:
-        dfs['Porcentagem'] = (dfs['VALOR LÍQUIDO']/dfs['VALOR LÍQUIDO'].sum())*100
-    for dfs in lista_para_incluir_coluna_de_porcentagem:
-        dfs.drop(dfs[dfs['Porcentagem']<1].index, inplace=True)    
+        dfs['Porcentagem'] = (dfs['VALOR BRUTO']/dfs['VALOR BRUTO'].sum())*100
+    for dfs in lista_remover_excecoes:
+        dfs.drop(dfs[dfs['Porcentagem']<1].index, inplace=True) 
+    
+    carteira_con = carteira_con.drop(carteira_con[carteira_con['Porcentagem']<0.2].index)
 
     padronizacao_dos_graficos = dict(hole=0.4,
                                     textinfo='label+percent',
@@ -1165,8 +1199,8 @@ if selecionar == 'Analitico':
             'VALE3']
     
     def criando_graficos_rf_rv (df,title,color):
-        df['Renda Variavel'] = df.loc[df['PRODUTO'].isin(lista_acoes_em_caixa),'VALOR LÍQUIDO'].sum()
-        df['Renda Fixa'] = df.loc[~df['PRODUTO'].isin(lista_acoes_em_caixa),'VALOR LÍQUIDO'].sum()
+        df['Renda Variavel'] = df.loc[df['PRODUTO'].isin(lista_acoes_em_caixa),'VALOR BRUTO'].sum()
+        df['Renda Fixa'] = df.loc[~df['PRODUTO'].isin(lista_acoes_em_caixa),'VALOR BRUTO'].sum()
         df['Total RV RF'] = df['Renda Variavel'] + df['Renda Fixa']
         labels = ['Renda Variavel', 'Renda Fixa']
         values = [df['Renda Variavel'].sum(), df['Renda Fixa'].sum()]
@@ -1176,23 +1210,27 @@ if selecionar == 'Analitico':
                               title_x=0.2,
                               title_font_size = 23,
                               uniformtext_minsize=14,)
-        
-        # Exibe o gráfico no Streamlit
-        st.plotly_chart(fig)
+        st.plotly_chart(fig,use_container_width=True)
 
-        #df2 = df.melt(id_vars=['PRODUTO'], var_name='VALOR LÍQUIDO', value_name='Valor')
+
         return df
+    col1,col2 = st.columns(2)
+ 
     mostrar_rv_x_rf = st.toggle('Ver Proporção Renda Fixa vs Renda Variável')
     if mostrar_rv_x_rf:
-        carteira_arr_media_rv_rf = criando_graficos_rf_rv(carteira_arr,'Arrojada',cafe_colors)
-        carteira_mod_media_rv_rf = criando_graficos_rf_rv(carteira_mod,'Moderada',night_colors)
-    
+        with col1:
+            carteira_arr_media_rv_rf = criando_graficos_rf_rv(carteira_con,'Conservadora',irises_colors)
+            carteira_arr_media_rv_rf = criando_graficos_rf_rv(carteira_arr,'Arrojada',cafe_colors)
+        with col2:
+            carteira_mod_media_rv_rf = criando_graficos_rf_rv(carteira_mod,'Moderada',night_colors)
+            carteira_arr_media_rv_rf = criando_graficos_rf_rv(carteira_equity,'Equity',cafe_colors)
+
 
     def criando_graficos(carteira,padronizacao,titulo):
 
         figura = go.Figure(data=[go.Pie(
             labels=carteira['PRODUTO'],
-            values=carteira['VALOR LÍQUIDO'],
+            values=carteira['VALOR BRUTO'],
             marker_colors=sunflowers_colors,
             scalegroup='one'
 
@@ -1221,7 +1259,7 @@ if selecionar == 'Analitico':
     figura_carteira_MOD_PREV_MOD = criando_graficos(carteira_MOD_PREV_MOD,padronizacao_dos_graficos,'Carteira Moderada - Previdencia - Moderada')
     figura_carteira_INC_PREV_MOD = criando_graficos(carteira_INC_PREV_MOD,padronizacao_dos_graficos,'Carteira Income - Previdencia - Moderada')
 
-    col1,col2 = st.columns(2)
+    
     with col1: 
         carteira_income = st.toggle('Income',key='ver_income')
         carteira_conse = st.toggle('Conservadora',key='ver_conservadora')
@@ -1289,7 +1327,7 @@ if selecionar == 'Analitico':
         with col1:st.plotly_chart(figura_carteira_MOD_PREV_MOD,use_container_width=True)
         with col2:st.dataframe(carteira_MOD_PREV_MOD)
 
-
+if selecionar == 'Análise Tecnica':
     ativos_e_dispercoes = []
     def obter_dados(ativo,start_dt,end_dt, numero_periodo):
         data = yf.download(ativo+'.SA',start=start_dt,end=end_dt,period='1d')
@@ -1315,7 +1353,7 @@ if selecionar == 'Analitico':
     
         print(ativo,media_21,media_42)
 
-if selecionar == 'Análise Tecnica':
+
     st.header("Disperção dos ativos")       
     lista_acoes_em_caixa = [
         'ARZZ3',

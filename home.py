@@ -28,7 +28,7 @@ selecionar = st.sidebar.radio('Selecione uma opção', paginas)
 
 #---------------------------------- 
 # Variaveis globais
-@st.cache_data(ttl='3m')     
+@st.cache_data(ttl='5m')     
 def le_excel(x):
     df = pd.read_excel(x)
     return df
@@ -168,7 +168,7 @@ if selecionar == 'Carteiras':
     # --------Manipulação de arquivos
    
 
-    arquivo2 = arquivo1.groupby(['CONTA','PRODUTO','ATIVO'])[['VALOR BRUTO','VALOR LÍQUIDO','QUANTIDADE']].sum().reset_index('CONTA')
+    arquivo2 = arquivo1.groupby(['CONTA','PRODUTO','ATIVO'])[['VALOR BRUTO','QUANTIDADE']].sum().reset_index('CONTA')
 
     # Sidebar
 
@@ -176,13 +176,15 @@ if selecionar == 'Carteiras':
 
     #---------------
     
-    novo_arq = arquivo2.loc[arquivo2['CONTA']  == input_text]
+    #novo_arq = arquivo2.loc[arquivo2['CONTA']  == input_text]
     cont_df = controle.loc[controle['Unnamed: 2'] == input_text]
-
+    filtrando_dados_por_conta = arquivo1.groupby(['CONTA','PRODUTO'])[['VALOR BRUTO','QUANTIDADE']].sum().reset_index('CONTA')
+    filtrando_dados_por_conta2 = filtrando_dados_por_conta.loc[filtrando_dados_por_conta['CONTA']==input_text]
+    novo_arq = filtrando_dados_por_conta2.copy()
 
     #----------------
 
-    novo_arq = novo_arq.groupby(['PRODUTO','CONTA'])[['VALOR LÍQUIDO','QUANTIDADE']].sum().reset_index()
+    novo_arq = novo_arq.groupby(['PRODUTO','CONTA'])[['VALOR BRUTO','QUANTIDADE']].sum().reset_index()
     controle = controle.iloc[:,[1,2,3,4,5,7,8,9,12,16,17,18]]
     
     
@@ -200,11 +202,13 @@ if selecionar == 'Carteiras':
 
 
         qtd_ativos = novo_arq.groupby('CONTA')['QUANTIDADE'].sum().reset_index()
-        pl_por_produtos = novo_arq.groupby('CONTA')['VALOR LÍQUIDO'].sum().reset_index()
+        pl_por_produtos = novo_arq.groupby('CONTA')['VALOR BRUTO'].sum().reset_index()
 
-        valor_liquido = pl_por_produtos.loc[0,'VALOR LÍQUIDO']
 
-        novo_arq['Basket'] = novo_arq['QUANTIDADE']/novo_arq['VALOR LÍQUIDO']
+        valor_liquido = pl_por_produtos.loc[0,'VALOR BRUTO']
+
+ 
+        novo_arq['Basket'] = novo_arq['QUANTIDADE']/novo_arq['VALOR BRUTO']
         
 
 
@@ -351,7 +355,7 @@ if selecionar == 'Carteiras':
         
 
         graf1 = go.Figure(data=[go.Pie(labels=novo_arq['PRODUTO'],
-                                        values=novo_arq['VALOR LÍQUIDO'],
+                                        values=novo_arq['VALOR BRUTO'],
                                         hole=0.4,
                                         textinfo='label+percent',
                                         insidetextorientation='radial',
@@ -443,10 +447,10 @@ if selecionar == 'Carteiras':
         #---------------------------------------------------
         #---------------------- Ajustando graficos e tabelas
         
-        novo_arq = novo_arq[['PRODUTO', 'VALOR LÍQUIDO', 'QUANTIDADE']]
+        novo_arq = novo_arq[['PRODUTO', 'VALOR BRUTO', 'QUANTIDADE']]
         novo_arq.rename(columns={
             'Produto':'Ativo',
-            'VALOR LÍQUIDO':'Valor em R$',
+            'VALOR BRUTO':'Valor em R$',
             'QUANTIDADE':'Quantidade do ativo'
         },inplace=True)
         arquivo_basket.rename(columns={
@@ -1197,6 +1201,11 @@ if selecionar == 'Analitico':
             'SBSP3',
             'SLCE3',
             'VALE3']
+    caixa = [
+        'BTG PACT TESOURO SELIC PREV FI RF REF DI',
+        'TESOURO DIRETO - LFT',      
+    ]
+    
     
     def criando_graficos_rf_rv (df,title,color):
         df['Renda Variavel'] = df.loc[df['PRODUTO'].isin(lista_acoes_em_caixa),'VALOR BRUTO'].sum()
@@ -1212,19 +1221,40 @@ if selecionar == 'Analitico':
                               uniformtext_minsize=14,)
         st.plotly_chart(fig,use_container_width=True)
 
+        return df
+    def criando_graficos_caixa (df,title,color):
+        df['Caixa'] = df.loc[df['PRODUTO'].isin(caixa),'VALOR BRUTO'].sum()
+        df['Ativos'] = df.loc[~df['PRODUTO'].isin(caixa),'VALOR BRUTO'].sum()
+        df['Total Caixa Ativos'] = df['Caixa'] + df['Ativos']
+        labels = ['Caixa', 'Ativos']
+        values = [df['Caixa'].sum(), df['Ativos'].sum()]
+        colors = cafe_colors
+        fig2 = go.Figure(data=[go.Pie(labels=labels, values=values, marker=dict(colors=color))])
+        fig2.update_layout(title_text=title,
+                              title_x=0.2,
+                              title_font_size = 23,
+                              uniformtext_minsize=14,)
+        st.plotly_chart(fig2,use_container_width=True)
 
         return df
+    
+
+
+    mostrar_rv_x_rf = st.toggle('Ver Proporção Renda Fixa vs Renda Variável e caixa')
     col1,col2 = st.columns(2)
  
-    mostrar_rv_x_rf = st.toggle('Ver Proporção Renda Fixa vs Renda Variável')
+
     if mostrar_rv_x_rf:
+        st.warning("Para caixa foram considerados: BTG PACT TESOURO SELIC PREV FI RF REF DI e TESOURO DIRETO - LFT")
         with col1:
-            carteira_arr_media_rv_rf = criando_graficos_rf_rv(carteira_con,'Conservadora',irises_colors)
+            carteira_con_media_rv_rf = criando_graficos_rf_rv(carteira_con,'Conservadora',irises_colors)
             carteira_arr_media_rv_rf = criando_graficos_rf_rv(carteira_arr,'Arrojada',cafe_colors)
+            carteira_inc_prevC_media_caixa = criando_graficos_caixa(carteira_INC_PREV_MOD,'Income Prev',night_colors)
         with col2:
             carteira_mod_media_rv_rf = criando_graficos_rf_rv(carteira_mod,'Moderada',night_colors)
-            carteira_arr_media_rv_rf = criando_graficos_rf_rv(carteira_equity,'Equity',cafe_colors)
-
+            carteira_eqt_media_rv_rf = criando_graficos_rf_rv(carteira_equity,'Equity',cafe_colors)
+            carteira_INC_media_caixa = criando_graficos_caixa(carteira_inc,'Income',night_colors)
+            carteira_mod_prevC_media_caixa = criando_graficos_caixa(carteira_MOD_PREV_MOD,'Moderara Prev',night_colors)
 
     def criando_graficos(carteira,padronizacao,titulo):
 
@@ -1328,67 +1358,43 @@ if selecionar == 'Analitico':
         with col2:st.dataframe(carteira_MOD_PREV_MOD)
 
 if selecionar == 'Análise Tecnica':
-    ativos_e_dispercoes = []
-    def obter_dados(ativo,start_dt,end_dt, numero_periodo):
-        data = yf.download(ativo+'.SA',start=start_dt,end=end_dt,period='1d')
-        return data['Close'].tail(numero_periodo)
-    
-    
 
-    def calcular_media(ativo,inicio,fim):
-        dados = obter_dados(ativo,inicio,fim,40)
-
-        media_21 = dados.rolling(window=21).mean()
-        media_42 = dados.rolling(window=42).mean()
-
-        return media_21,media_42
-    
-
-    data_atual = pd.to_datetime('today').strftime('%Y-%m-%d')
-    vinte_e_um_DIAS = (pd.to_datetime('today')-pd.DateOffset(days=21)).strftime('%Y-%m-%d')
-    quarenta_e_dois = (pd.to_datetime('today')-pd.DateOffset(days=42)).strftime('%Y-%m-%d')
-
-    for ativo in lista_acoes_em_caixa:
-        media_21,media_42 = calcular_media(ativo,quarenta_e_dois,data_atual)
-    
-        print(ativo,media_21,media_42)
-
-
-    st.header("Disperção dos ativos")       
     lista_acoes_em_caixa = [
-        'ARZZ3',
-        'ASAI3',
-        'CSAN3',
-        'CSED3',
-        'EGIE3',
-        'EQTL3',
-        'EZTC3',
-        'HYPE3',
-        'KEPL3',
-        'MULT3',
-        'PRIO3',
-        'PSSA3',
-        'SBSP3',
-        'SLCE3',
-        'VALE3']
-
+            'ARZZ3',
+            'ASAI3',
+            'CSAN3',
+            'CSED3',
+            'EGIE3',
+            'EQTL3',
+            'EZTC3',
+            'HYPE3',
+            'KEPL3',
+            'MULT3',
+            'PRIO3',
+            'PSSA3',
+            'SBSP3',
+            'SLCE3',
+            'VALE3']
 
     data_atual = pd.to_datetime('today').strftime('%Y-%m-%d')
     vinte_e_um_DIAS = (pd.to_datetime('today')-pd.DateOffset(days=21)).strftime('%Y-%m-%d')
     quarenta_e_dois = (pd.to_datetime('today')-pd.DateOffset(days=755)).strftime('%Y-%m-%d')
 
 
-
-    graficos = go.Figure()
-
     ativos_e_dispercoes = []
     try:
+        @st.cache_resource(ttl= '2m')
         def obter_dados(ativo,start_dt,end_dt,):
+            ticker_atual = yf.Ticker(ativo +'.SA').history(period='1m')['Close'].iloc[-1]
             data = yf.download(ativo+'.SA',start=start_dt,end=end_dt,period='1d')
+            data['Preco momento'] = ticker_atual
             return data
     except:
         st.warning('Problema com os dados')
+
+
     for ativos in lista_acoes_em_caixa:
+        
 
         ticker = obter_dados(ativos,quarenta_e_dois,data_atual)
         ticker['Ativo'] = ativos
@@ -1397,28 +1403,82 @@ if selecionar == 'Análise Tecnica':
         dados['SMA 42'] = dados['Adj Close'].ewm(span=42,adjust=False).mean()
         dados['SMA 21'] = dados['Adj Close'].ewm(span=21,adjust=False).mean()
 
+
         dados['Dispersão 42 periodos'] = (dados['Adj Close']/dados['SMA 42'])-1
         dados['Dispersão 21 periodos'] = (dados['Adj Close']/dados['SMA 21'])-1
+        dados['Dispersão Momento 42'] = ((dados['Preco momento'].iloc[-1]/dados['SMA 42'])-1)*100
+        dados['Dispersão Momento 21'] = ((dados['Preco momento'].iloc[-1]/dados['SMA 21'])-1)*100
+        dados['Dispersão Maxima 42'] = dados['Dispersão Momento 42'].max()
+        dados['Dispersão Minima 42'] = dados['Dispersão Momento 42'].min()
+        dados['Dispersão Maxima 21'] = dados['Dispersão Momento 21'].max()
+        dados['Dispersão Minima 21'] = dados['Dispersão Momento 21'].min()
+        dados['Dispersão Media 42'] = dados['Dispersão Momento 42'].mean()
+        dados['Dispersão Media 21'] = dados['Dispersão Momento 21'].mean()
 
-        dados['Disperção 42 preço'] = dados['Adj Close'].iloc[-1]*dados['Dispersão 42 periodos'].iloc[-1]
+        with st.sidebar:
+            if st.toggle(f'Ver grafico {ativos}',key=f'{ativos}+1'):
+                st.warning(f"Ativo : {ativos} Preço :{dados['Adj Close'].iloc[-1]:,.2f}")
+                st.warning(f"Ativo : {ativos} ----Média de 42 periodos :{dados['SMA 42'].iloc[-1]:,.2f},---Dispersão maxima : {dados['Dispersão 42 periodos'].max()*100:,.2f}---%Dispersão minima : {dados['Dispersão 42 periodos'].min()*100:,.2f}%---Dispersão media : {dados['Dispersão 42 periodos'].mean()*100:,.2f}%---Disperção atual :{dados['Dispersão Momento 42'].iloc[-1]*100:,.2f}%")
+                st.warning(f"Ativo : {ativos} ---- Média de 21 periodos :{dados['SMA 21'].iloc[-1]:,.2f},--- Dispersão maxima : {dados['Dispersão 21 periodos'].max()*100:,.2f}%,--- Dispersão minima : {dados['Dispersão 21 periodos'].min()*100:,.2f}%---Dispersão media  : {dados['Dispersão 21 periodos'].mean()*100:,.2f}%----  Disperção  atual :{dados['Dispersão Momento 21'].iloc[-1]*100:,.2f}%")
+                
 
-        st.warning(f"Ativo : {ativos} Preço :{dados['Adj Close'].iloc[-1]:,.2f}")
-        st.warning(f" Média de 42 periodos :{dados['SMA 42'].iloc[-1]:,.2f}---Dispersão maxima : {dados['Dispersão 42 periodos'].max()*100:,.2f}%---Dispersão minima : {dados['Dispersão 42 periodos'].min()*100:,.2f}%---Dispersão media : {dados['Dispersão 42 periodos'].mean()*100:,.2f}%---Disperção atual :{dados['Dispersão 42 periodos'].iloc[-1]*100:,.2f}%")
-        st.warning(f" Média de 21 periodos :{dados['SMA 21'].iloc[-1]:,.2f},--- Dispersão maxima : {dados['Dispersão 21 periodos'].max()*100:,.2f}%,--- Dispersão minima : {dados['Dispersão 21 periodos'].min()*100:,.2f}%---Dispersão media  : {dados['Dispersão 21 periodos'].mean()*100:,.2f}%----  Disperção  atual :{dados['Dispersão 21 periodos'].iloc[-1]*100:,.2f}%")
-        
+                graficos = go.Figure()
+                graficos.add_trace(go.Candlestick(x=dados.index,
+                                                open=dados['Open'],
+                                                high=dados['High'],
+                                                low=dados['Low'],
+                                                close=dados['Close'],
+                                                name=f"{ativos}"))
+                #graficos.add_trace(go.Scatter(x=dados.index, y=dados['Adj Close'], mode='lines', line=dict(width=3,color='orange'), name=f'{ativos} - Preço'))
+                graficos.add_trace(go.Scatter(x=dados.index, y=dados['SMA 42'], mode='lines', name=f'{ativos} - SMA 42'))
+                graficos.add_trace(go.Scatter(x=dados.index, y=dados['SMA 21'], mode='lines', name=f'{ativos} - SMA 21'))
 
-        graficos = go.Figure()
-        graficos.add_trace(go.Scatter(x=dados.index, y=dados['Adj Close'], mode='lines', line=dict(width=3,color='orange'), name=f'{ativos} - Preço'))
-        graficos.add_trace(go.Scatter(x=dados.index, y=dados['SMA 42'], mode='lines', name=f'{ativos} - SMA 42'))
-        graficos.add_trace(go.Scatter(x=dados.index, y=dados['SMA 21'], mode='lines', name=f'{ativos} - SMA 21'))
+                graficos.update_layout(title=f'{ativos} - Metrics Comparison',
+                                    xaxis_title='Data',
+                                    yaxis_title='Valor',
+                                    legend=dict(x=0, y=1, traceorder='normal'))
 
-        graficos.update_layout(title=f'{ativos} - Metrics Comparison',
-                            xaxis_title='Data',
-                            yaxis_title='Valor',
-                            legend=dict(x=0, y=1, traceorder='normal'))
+                st.plotly_chart(graficos,use_container_width=True)
+        ativos_e_dispercoes.append(dados.iloc[-1,:])    
 
 
-        st.plotly_chart(graficos,use_container_width=True)
+    df_final = pd.DataFrame(ativos_e_dispercoes).reset_index()
+    df_final['Avisos'] = ''
+    print(df_final.info())
+    df_final = df_final.iloc[:,[8,-1,7,9,10,14,13,15,17,16,18,19,20]]
+    df_final=df_final.rename(columns={
+        'Preco momento':'Cotação',
+        'Dispersão Momento 21':'Dispersão 21',
+        'Dispersão Momento 42':'Dispersão 42'
+    })
+    colunas_df_final = ['Cotação','Dispersão 21', 'Dispersão 42',
+        'Dispersão Maxima 42', 'Dispersão Maxima 21', 'Dispersão Minima 42',
+        'Dispersão Minima 21', 'Dispersão Media 42', 'Dispersão Media 21','SMA 42','SMA 21']
+
+    for coluna in colunas_df_final:
+        #df_final[coluna] = df_final[coluna].abs()
+        df_final[coluna] = df_final[coluna].map("{:,.2f}".format)
+    
+    df_final['Avisos'] = np.where(df_final['Cotação']<df_final['SMA 42'],'ATENÇÃO',df_final['Avisos'])
+    df_final['Avisos'] = np.where(df_final['Cotação']<df_final['SMA 21'],'ATENÇÃO',df_final['Avisos'])
+    df_final['Avisos'] = np.where(df_final['Dispersão 42']>df_final['Dispersão Maxima 42'],'VENDA',df_final['Avisos'])
+    df_final['Avisos'] = np.where(df_final['Dispersão 21']>df_final['Dispersão Maxima 21'],'VENDA',df_final['Avisos'])
+    df_final['Avisos'] = np.where(df_final['Dispersão 42']<df_final['Dispersão Minima 42'],'COMPRA',df_final['Avisos'])
+    df_final['Avisos'] = np.where(df_final['Dispersão 21']<df_final['Dispersão Minima 21'],'COMPRA',df_final['Avisos'])
+
+    #df_final['Dispersão 21'].at[]
+
+    cores = {'COMPRA':'background-color: green',
+            'VENDA':'background-color: red',
+            'AGUARDE':'background-color: yellow',
+            'ATENÇÃO':'background-color: orange',
+            '':'background-color: orange'}
+
+
+
+
+
+    st.dataframe(df_final.style.applymap(lambda x: cores[x], subset=['Avisos']),use_container_width=True)
 
 
 

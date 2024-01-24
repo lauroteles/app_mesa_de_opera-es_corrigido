@@ -920,27 +920,27 @@ if selecionar == 'Divisão de operadores':
     # Filtros para adicionar operadores
 
         #Filtro Breno
-        filtro = (arquivo_final['VALOR']<250000) & (arquivo_final['Operador']=='Edu')
+        filtro = (arquivo_final['VALOR']<350000) & (arquivo_final['Operador']=='Edu')
         arquivo_final.loc[filtro,'Operador'] ='Breno'
 
         #Filtro Edu
 
-        filtro2 =  filtro = (arquivo_final['VALOR']>250000) & (arquivo_final['Operador']=='Edu')
+        filtro2 =  filtro = (arquivo_final['VALOR']>350000) & (arquivo_final['Operador']=='Edu')
         arquivo_final.loc[filtro2,'Operador'] = 'Edu'
 
         #filtro Bruno
 
-        filtro4 = (arquivo_final['VALOR']<250000) & (arquivo_final['Operador']=='Léo')
+        filtro4 = (arquivo_final['VALOR']<500000) & (arquivo_final['Operador']=='Léo')
         arquivo_final.loc[filtro4,'Operador'] ='Bruno'
         
         # Filtro léo
-        filtro6  = (arquivo_final['VALOR']>250000) & (arquivo_final['Operador']=='Léo')
+        filtro6  = (arquivo_final['VALOR']>500000) & (arquivo_final['Operador']=='Léo')
         arquivo_final.loc[filtro6,'Operador'] = 'Léo'
 
-        filtro7 = (arquivo_final['VALOR']>250000)&(arquivo_final['Operador'] =='Breno')
+        filtro7 = (arquivo_final['VALOR']>350000)&(arquivo_final['Operador'] =='Breno')
         arquivo_final.loc[filtro7,'Operador'] = 'Edu'
 
-        filtro8 = (arquivo_final['VALOR']>250000)&(arquivo_final['Operador'] =='Bruno')
+        filtro8 = (arquivo_final['VALOR']>500000)&(arquivo_final['Operador'] =='Bruno')
         arquivo_final.loc[filtro8,'Operador'] = 'Léo'
 
         

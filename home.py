@@ -15,7 +15,7 @@ import io
 import xlsxwriter as xlsxwriter
 import datetime
 import time
-
+import pytz
 
 
 t0 = time.perf_counter()
@@ -1044,7 +1044,7 @@ if selecionar == 'Divisão de operadores':
         st.markdown("<br>",unsafe_allow_html=True)
 
         col1,col2,col3,col4,col5 = st.columns(5)
-
+        print(controle.info())
         class Contas_Operadas:
             def __init__(self, numero_da_conta, nome_do_cliente, operador_da_conta, horario_da_operação):
                 self.numero_da_conta = numero_da_conta
@@ -1053,9 +1053,19 @@ if selecionar == 'Divisão de operadores':
                 self.horario_da_operação = horario_da_operação
 
         def processar_registro_de_conta_e_operador_resposavel(numero_da_conta,operador_da_conta):
-            nome_do_cliente = arquivo_final2.loc[arquivo_final2['CONTA'] == numero_da_conta,'Nome'].iloc[0]
-            horario_da_operação = datetime.datetime.now().strftime('%d-%m-%Y_%H')
-            conta_operada = Contas_Operadas(numero_da_conta,nome_do_cliente,operador_da_conta,horario_da_operação)
+
+            fuso_horario_brasil = pytz.timezone('America/Sao_Paulo')
+            horario_da_operacao_brasil = datetime.datetime.now(fuso_horario_brasil).strftime('%d-%m-%Y_%H')
+
+            if numero_da_conta in arquivo_final2['CONTA'].values:
+                nome_do_cliente = arquivo_final2.loc[arquivo_final2['CONTA'] == numero_da_conta, 'Nome'].iloc[0]
+            # Verificar se o número_da_conta existe em controle
+            elif numero_da_conta in controle['CONTA'].values:
+                nome_do_cliente = controle.loc[controle['CONTA'] == numero_da_conta, 'Unnamed: 1'].iloc[0]
+            else:
+                nome_do_cliente = ''
+            numero_da_conta = str(numero_da_conta)    
+            conta_operada = Contas_Operadas(numero_da_conta,nome_do_cliente,operador_da_conta,horario_da_operacao_brasil)
             excel_file = 'contas_operadas.xlsx'
             try:
                 df_existing = pd.read_excel(excel_file)
@@ -1505,10 +1515,5 @@ if selecionar == 'Análise Tecnica':
 t1 = time.perf_counter()
 
 print(t1-t0)
-
-
-
-
-
 
 

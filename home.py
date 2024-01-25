@@ -982,7 +982,7 @@ if selecionar == 'Divisão de operadores':
         arquivo_final2 = arquivo_final2.loc[(arquivo_final2['Status'] == 'Inativo') |(arquivo_final2['Status'] == 'Ativo') | (arquivo_final2['Status'] == 'Pode Operar')| (arquivo_final2['Status'] == 'Checar conta')]
  
         
-        arquivo_final2 = arquivo_final2.iloc[:,[2,1,11,5,6,7,8,9,10,4,3]]
+        arquivo_final2 = arquivo_final2.iloc[:,[2,1,11,4,5,6,7,8,9,10,3]]
 
 
         

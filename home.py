@@ -976,20 +976,21 @@ if selecionar == 'Divisão de operadores':
         arquivo_final2 = arquivo_final2.rename(columns=
                                             {'Unnamed: 12':'Perfil da Carteira'})
         arquivo_final2 = arquivo_final2.rename(columns=
-                                    {'Unnamed: 35':'PL Desatualizado'})
+                                    {'Unnamed: 35':'PL Desatualizado',
+                                     'Unnamed: 37':'PL Planilha Controle'})
         
-        arquivo_final2 = arquivo_final2.loc[(arquivo_final2['Status'] == 'Ativo') | (arquivo_final2['Status'] == 'Pode Operar')| (arquivo_final2['Status'] == 'Checar conta')]
-
+        arquivo_final2 = arquivo_final2.loc[(arquivo_final2['Status'] == 'Inativo') |(arquivo_final2['Status'] == 'Ativo') | (arquivo_final2['Status'] == 'Pode Operar')| (arquivo_final2['Status'] == 'Checar conta')]
+ 
         
         arquivo_final2 = arquivo_final2.iloc[:,[2,1,11,5,6,7,8,9,10,4,3]]
 
 
         
-        arquivo_final2.insert(loc = 0,
-                            column='Checkbox',
-                            value=st.checkbox('arquivo_final2'
-                                            )
-                                            )
+        # arquivo_final2.insert(loc = 0,
+        #                     column='Checkbox',
+        #                     value=st.checkbox('arquivo_final2'
+        #                                     )
+        #                                     )
 
 
         barra1 = st.selectbox('Selecione o Operador',
@@ -997,11 +998,27 @@ if selecionar == 'Divisão de operadores':
 
         df7 = arquivo_final2.loc[arquivo_final2['Operador'] == barra1]
         df6 = arquivo_final2['Operador'].value_counts()
+        def formatar_valor(valor):
+            return "{:,.2f}".format(valor)
         
-        data_frame_of = st.data_editor(df7,
-                                    width=2000,
-                                    height=500,
-                                    num_rows='dynamic')
+        ajustar_decimais = ['SALDO','PL Planilha Controle','BTG PL']
+        for coluna in ajustar_decimais:
+            df7[coluna] = df7[coluna].apply(formatar_valor)
+         
+
+
+        cores = {'Inativo':'background-color: yellow',
+            'Ativo':'background-color: green',
+            'Pode Operar':'background-color: green',
+            'Checar conta':'background-color: red'}
+
+        # data_frame_of = st.data_editor(df7,
+        #                             width=2000,
+        #                             height=500,
+        #                             num_rows='dynamic')
+        
+
+        st.dataframe(df7.style.applymap(lambda x: cores[x], subset=['Status']),use_container_width=True)
          
         if arquivo_final2 is not None:
             
@@ -1069,7 +1086,7 @@ if selecionar == 'Divisão de operadores':
 
         contas_operadas_today = contas_operadas.loc[contas_operadas['horario_da_operação'].dt.date == datetime.datetime.now().date()]
         contas_operadas_today = contas_operadas_today.sort_values(by='horario_da_operação', ascending=False)
-        print(contas_operadas.columns)
+        
         st.dataframe(contas_operadas_today)
 
         if arquivo_final2 is not None:

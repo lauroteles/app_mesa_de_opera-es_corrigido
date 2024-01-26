@@ -1046,11 +1046,11 @@ if selecionar == 'Divisão de operadores':
         col1,col2,col3,col4,col5 = st.columns(5)
         print(controle.info())
         class Contas_Operadas:
-            def __init__(self, numero_da_conta, nome_do_cliente, operador_da_conta, horario_da_operação):
+            def __init__(self, numero_da_conta, nome_do_cliente, operador_da_conta, horario_da_operação_brasil):
                 self.numero_da_conta = numero_da_conta
                 self.nome_do_cliente = nome_do_cliente
                 self.operador_da_conta = operador_da_conta
-                self.horario_da_operação = horario_da_operação
+                self.horario_da_operação = horario_da_operação_brasil
 
         def processar_registro_de_conta_e_operador_resposavel(numero_da_conta,operador_da_conta):
 

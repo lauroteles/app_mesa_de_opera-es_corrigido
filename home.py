@@ -1124,18 +1124,6 @@ if selecionar == 'Divisão de operadores':
 #---------------------------------- ---------------------------------- ---------------------------------- ---------------------------------- 
 if selecionar == 'Analitico':
 
-    # arquivo2 = arquivo1.groupby(['CONTA','PRODUTO','ATIVO'])[['VALOR BRUTO','VALOR LÍQUIDO','QUANTIDADE']].sum().reset_index('CONTA')
-
-    # arquivo_analise = arquivo2.groupby(['PRODUTO','CONTA'])[['VALOR BRUTO','QUANTIDADE']].sum().reset_index()
-    # controle = controle.iloc[:,[2,6,12]]
-
-
-    # controle['Unnamed: 2'] = controle['Unnamed: 2'].astype(str)
-    # controle['Unnamed: 2'] = list(map(lambda x: '00' + x,controle['Unnamed: 2']))
-        
-    # juncao_arquivo_de_posicao_e_controle = pd.merge(controle,arquivo_analise, left_on='Unnamed: 2',right_on='CONTA', how= 'outer' )
-
-    # soma_dos_ativos_por_carteira = juncao_arquivo_de_posicao_e_controle.groupby(['Unnamed: 12','PRODUTO'])['VALOR BRUTO'].sum().reset_index()
 
 
 
@@ -1481,17 +1469,23 @@ if selecionar == 'Análise Tecnica':
     colunas_df_final = ['Cotação','Dispersão 21', 'Dispersão 42',
         'Dispersão Maxima 42', 'Dispersão Maxima 21', 'Dispersão Minima 42',
         'Dispersão Minima 21', 'Dispersão Media 42', 'Dispersão Media 21','SMA 42','SMA 21']
+    
+    colocar_simbolo_percent = ['Dispersão 21', 'Dispersão 42',
+        'Dispersão Maxima 42', 'Dispersão Maxima 21', 'Dispersão Minima 42',
+        'Dispersão Minima 21', 'Dispersão Media 42', 'Dispersão Media 21']
 
     for coluna in colunas_df_final:
         #df_final[coluna] = df_final[coluna].abs()
         df_final[coluna] = df_final[coluna].map("{:,.2f}".format)
+  
     
-    df_final['Avisos'] = np.where(df_final['Cotação']<df_final['SMA 42'],'ATENÇÃO',df_final['Avisos'])
-    df_final['Avisos'] = np.where(df_final['Cotação']<df_final['SMA 21'],'ATENÇÃO',df_final['Avisos'])
-    df_final['Avisos'] = np.where(df_final['Dispersão 42']>df_final['Dispersão Maxima 42'],'VENDA',df_final['Avisos'])
-    df_final['Avisos'] = np.where(df_final['Dispersão 21']>df_final['Dispersão Maxima 21'],'VENDA',df_final['Avisos'])
-    df_final['Avisos'] = np.where(df_final['Dispersão 42']<df_final['Dispersão Minima 42'],'COMPRA',df_final['Avisos'])
-    df_final['Avisos'] = np.where(df_final['Dispersão 21']<df_final['Dispersão Minima 21'],'COMPRA',df_final['Avisos'])
+
+    df_final['Avisos'] = np.where(df_final['Cotação']<df_final['SMA 42'],'ATENÇÃO','AGUARDE')
+    df_final['Avisos'] = np.where(df_final['Cotação']<df_final['SMA 21'],'ATENÇÃO','AGUARDE')
+    df_final['Avisos'] = np.where(df_final['Dispersão 42'].iloc[-1]>df_final['Dispersão Maxima 42'].iloc[-1],'VENDA',df_final['Avisos'])
+    df_final['Avisos'] = np.where(df_final['Dispersão 21'].iloc[-1]>df_final['Dispersão Maxima 21'].iloc[-1],'VENDA',df_final['Avisos'])
+    df_final['Avisos'] = np.where(df_final['Dispersão 42'].iloc[-1]<df_final['Dispersão Minima 42'].iloc[-1],'COMPRA',df_final['Avisos'])
+    df_final['Avisos'] = np.where(df_final['Dispersão 21'].iloc[-1]<df_final['Dispersão Minima 21'].iloc[-1],'COMPRA',df_final['Avisos'])
 
     #df_final['Dispersão 21'].at[]
 
@@ -1499,12 +1493,13 @@ if selecionar == 'Análise Tecnica':
             'VENDA':'background-color: red',
             'AGUARDE':'background-color: yellow',
             'ATENÇÃO':'background-color: orange',
-            '':'background-color: orange'}
+            '':'background-color: DarkCyan'}
 
 
+    print(df_final)
 
-
-
+    for coluna in colocar_simbolo_percent:
+        df_final[coluna] = df_final[coluna].astype(str).map(lambda x: x+" %") 
     st.dataframe(df_final.style.applymap(lambda x: cores[x], subset=['Avisos']),use_container_width=True)
 
 
@@ -1515,5 +1510,10 @@ if selecionar == 'Análise Tecnica':
 t1 = time.perf_counter()
 
 print(t1-t0)
+
+
+
+
+
 
 

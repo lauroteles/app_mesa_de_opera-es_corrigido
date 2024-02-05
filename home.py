@@ -406,7 +406,8 @@ if selecionar == 'Carteiras':
         basket['Basket_BTG'] = np.where(basket['Basket_BTG']<0,basket['Basket_BTG'].astype(int).astype(str).str[1:],basket['Basket_BTG'])
         basket['Conta'] = input_text
         basket['Validade'] = 'DIA'
-        basket['Basket_BTG'] =basket['Basket_BTG'].astype(int)
+        basket['Basket_BTG'] = pd.to_numeric(basket['Basket_BTG'],errors='coerce')
+        basket['Basket_BTG'] =basket['Basket_BTG'].astype(float).fillna(0).astype(int)
         
         for ativo in basket['Ativo']:
             ticker = yf.Ticker(ativo +'.SA')

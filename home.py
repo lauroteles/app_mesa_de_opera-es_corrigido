@@ -978,7 +978,7 @@ if selecionar == 'Divisão de operadores':
                                             {'Unnamed: 12':'Perfil da Carteira'})
         arquivo_final2 = arquivo_final2.rename(columns=
                                     {'Unnamed: 35':'PL Desatualizado',
-                                     'Unnamed: 37':'PL Planilha Controle'})
+                                     'Unnamed: 38':'PL Planilha Controle'})
         
         arquivo_final2 = arquivo_final2.loc[(arquivo_final2['Status'] == 'Inativo') |(arquivo_final2['Status'] == 'Ativo') | (arquivo_final2['Status'] == 'Pode Operar')| (arquivo_final2['Status'] == 'Checar conta')]
  

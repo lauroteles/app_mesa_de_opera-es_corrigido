@@ -63,21 +63,21 @@ planilha_controle = planilha_controle1.copy()
      
 
 equities = {'ARZZ3': 4.5,
-            'ASAI3':5.75,
-            'CSAN3':6,
+            'ASAI3':5,
+            'CSAN3':5.50,
             'CSED3':5,
             'EGIE3':4.5,
-            'EQTL3':6,
+            'EQTL3':5.50,
             'EZTC3':5.75,
             'HYPE3':6.50,
             'KEPL3':7.50,
-            'MULT3':5,
+            'MULT3':4.50,
             'PRIO3':8,
-            'PSSA3':5.50,
-            'SBSP3':4.50,
+            'PSSA3':5,
+            'SBSP3':4.25,
             'SLCE3':8.50,
             'VALE3':10,
-            'Caixa':7
+            'Caixa':10
             }
 equities_graf= pd.DataFrame(list(equities.items()),columns=['Ativo','Proporção'])
 equities_graf['Proporção'] =equities_graf['Proporção']/100

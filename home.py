@@ -63,21 +63,21 @@ planilha_controle = planilha_controle1.copy()
      
 
 equities = {'ARZZ3': 4.5,
-            'ASAI3':5,
-            'CSAN3':5.50,
+            'ASAI3':5.75,
+            'CSAN3':6,
             'CSED3':5,
             'EGIE3':4.5,
-            'EQTL3':5.50,
+            'EQTL3':6,
             'EZTC3':5.75,
             'HYPE3':6.50,
             'KEPL3':7.50,
-            'MULT3':4.50,
+            'MULT3':5,
             'PRIO3':8,
-            'PSSA3':5,
-            'SBSP3':4.25,
+            'PSSA3':5.50,
+            'SBSP3':4.50,
             'SLCE3':8.50,
             'VALE3':10,
-            'Caixa':10
+            'Caixa':7
             }
 equities_graf= pd.DataFrame(list(equities.items()),columns=['Ativo','Proporção'])
 equities_graf['Proporção'] =equities_graf['Proporção']/100
@@ -168,7 +168,7 @@ if selecionar == 'Carteiras':
     # --------Manipulação de arquivos
    
 
-    arquivo2 = arquivo1.groupby(['CONTA','PRODUTO','ATIVO'])[['VALOR BRUTO','QUANTIDADE']].sum().reset_index('CONTA')
+    arquivo2 = arquivo1.groupby(['Conta','Produto','Ativo'])[['Valor Bruto','Quantidade']].sum().reset_index('Conta')
 
     # Sidebar
 
@@ -178,13 +178,13 @@ if selecionar == 'Carteiras':
     
     #novo_arq = arquivo2.loc[arquivo2['CONTA']  == input_text]
     cont_df = controle.loc[controle['Unnamed: 2'] == input_text]
-    filtrando_dados_por_conta = arquivo1.groupby(['CONTA','PRODUTO'])[['VALOR BRUTO','QUANTIDADE']].sum().reset_index('CONTA')
-    filtrando_dados_por_conta2 = filtrando_dados_por_conta.loc[filtrando_dados_por_conta['CONTA']==input_text]
+    filtrando_dados_por_conta = arquivo1.groupby(['Conta','Produto'])[['Valor Bruto','Quantidade']].sum().reset_index('Conta')
+    filtrando_dados_por_conta2 = filtrando_dados_por_conta.loc[filtrando_dados_por_conta['Conta']==input_text]
     novo_arq = filtrando_dados_por_conta2.copy()
 
     #----------------
 
-    novo_arq = novo_arq.groupby(['PRODUTO','CONTA'])[['VALOR BRUTO','QUANTIDADE']].sum().reset_index()
+    novo_arq = novo_arq.groupby(['Produto','Conta'])[['Valor Bruto','Quantidade']].sum().reset_index()
     controle = controle.iloc[:,[1,2,3,4,5,7,8,9,12,16,17,18]]
     
     
@@ -194,21 +194,21 @@ if selecionar == 'Carteiras':
     controle['Unnamed: 2'] = controle['Unnamed: 2'].astype(str)
     controle['Unnamed: 2'] = list(map(lambda x: '00' + x,controle['Unnamed: 2']))
     try:
-                
-        novo_controle = pd.merge(controle,novo_arq, left_on='Unnamed: 2',right_on='CONTA', how= 'outer' )
+            
+        novo_controle = pd.merge(controle,novo_arq, left_on='Unnamed: 2',right_on='Conta', how= 'outer' )
         nov_controle = controle.loc[controle['Unnamed: 2'] == input_text ]
         
         #--------------- somando PL da carteira
 
 
-        qtd_ativos = novo_arq.groupby('CONTA')['QUANTIDADE'].sum().reset_index()
-        pl_por_produtos = novo_arq.groupby('CONTA')['VALOR BRUTO'].sum().reset_index()
+        qtd_ativos = novo_arq.groupby('Conta')['Quantidade'].sum().reset_index()
+        pl_por_produtos = novo_arq.groupby('Conta')['Valor Bruto'].sum().reset_index()
 
 
-        valor_liquido = pl_por_produtos.loc[0,'VALOR BRUTO']
+        valor_liquido = pl_por_produtos.loc[0,'Valor Bruto']
 
- 
-        novo_arq['Basket'] = novo_arq['QUANTIDADE']/novo_arq['VALOR BRUTO']
+
+        novo_arq['Basket'] = novo_arq['Quantidade']/novo_arq['Valor Bruto']
         
 
 
@@ -269,9 +269,9 @@ if selecionar == 'Carteiras':
         distribuicao_alvo = distribuicao_alvo.sort_values(by='Ativo')
         distribuicao_alvo = distribuicao_alvo.drop(columns='index')
 
-        novo_arq = novo_arq.sort_values(by='PRODUTO')
-        novo_arq = novo_arq.drop(columns='CONTA')
-        arquivo_basket = pd.merge(distribuicao_alvo,novo_arq, left_on='Ativo',right_on='PRODUTO',how='outer')
+        novo_arq = novo_arq.sort_values(by='Produto')
+        novo_arq = novo_arq.drop(columns='Conta')
+        arquivo_basket = pd.merge(distribuicao_alvo,novo_arq, left_on='Ativo',right_on='Produto',how='outer')
         arquivo_basket['Quantidade Ideal'] = arquivo_basket['Basket']*arquivo_basket['Valor Distribuido']
         arquivo_basket = arquivo_basket[['Ativo', 'Valor Distribuido','Quantidade Ideal']]
 
@@ -307,8 +307,8 @@ if selecionar == 'Carteiras':
             'VALE3',
             'Caixa']
 
-        filtro_rv = novo_arq[novo_arq['PRODUTO'].isin(lista_acoes)].reset_index()
-        filtro_rf = novo_arq[~novo_arq['PRODUTO'].isin(lista_acoes)].reset_index()
+        filtro_rv = novo_arq[novo_arq['Produto'].isin(lista_acoes)].reset_index()
+        filtro_rf = novo_arq[~novo_arq['Produto'].isin(lista_acoes)].reset_index()
 
         filtro_rv_BASE = moderada_graf[moderada_graf['Ativo'].isin(lista_acoes)].reset_index()
         
@@ -317,8 +317,8 @@ if selecionar == 'Carteiras':
         base_df_rf = arquivo_basket[arquivo_basket['Ativo'].isin(lista_acoes)].reset_index()
         base_df_rv = arquivo_basket[~arquivo_basket['Ativo'].isin(lista_acoes)].reset_index()
 
-        filtro_total_rvrf = novo_arq[novo_arq['PRODUTO'].isin(lista_acoes)].sum().reset_index()
-        analise_rvrf = novo_arq[~novo_arq['PRODUTO'].isin(lista_acoes)].sum().reset_index()
+        filtro_total_rvrf = novo_arq[novo_arq['Produto'].isin(lista_acoes)].sum().reset_index()
+        analise_rvrf = novo_arq[~novo_arq['Produto'].isin(lista_acoes)].sum().reset_index()
 
 
         st.markdown("<br>",unsafe_allow_html=True)
@@ -354,8 +354,8 @@ if selecionar == 'Carteiras':
 
         
 
-        graf1 = go.Figure(data=[go.Pie(labels=novo_arq['PRODUTO'],
-                                        values=novo_arq['VALOR BRUTO'],
+        graf1 = go.Figure(data=[go.Pie(labels=novo_arq['Produto'],
+                                        values=novo_arq['Valor Bruto'],
                                         hole=0.4,
                                         textinfo='label+percent',
                                         insidetextorientation='radial',
@@ -394,11 +394,11 @@ if selecionar == 'Carteiras':
         
         # -------------- Criando arquivo para Basket
         
-        basket = pd.merge(arquivo_basket,novo_arq,left_on='Ativo',right_on='PRODUTO',how='inner').reset_index()
+        basket = pd.merge(arquivo_basket,novo_arq,left_on='Ativo',right_on='Produto',how='inner').reset_index()
         
         precos_mercado = {}
 
-        basket['Basket_BTG'] = basket['Quantidade Ideal']-basket['QUANTIDADE']
+        basket['Basket_BTG'] = basket['Quantidade Ideal']-basket['Quantidade']
         basket = basket[[
             'Ativo',  'Basket_BTG']]
         basket['C/V'] = np.where(basket['Basket_BTG']<0,'V','C')
@@ -448,11 +448,11 @@ if selecionar == 'Carteiras':
         #---------------------------------------------------
         #---------------------- Ajustando graficos e tabelas
         
-        novo_arq = novo_arq[['PRODUTO', 'VALOR BRUTO', 'QUANTIDADE']]
+        novo_arq = novo_arq[['Produto', 'Valor Bruto', 'Quantidade']]
         novo_arq.rename(columns={
             'Produto':'Ativo',
-            'VALOR BRUTO':'Valor em R$',
-            'QUANTIDADE':'Quantidade do ativo'
+            'Valor Bruto':'Valor em R$',
+            'Quantidade':'Quantidade do ativo'
         },inplace=True)
         arquivo_basket.rename(columns={
             'Valor Distribuido':'Valor em R$',
@@ -467,7 +467,7 @@ if selecionar == 'Carteiras':
         somatario_basket = basket.copy()
         compra = somatario_basket[somatario_basket['C/V']=='C']
         compra['valor'] = compra['Quantidade']*compra['Preço']
-    
+
         
 
         venda = somatario_basket[somatario_basket['C/V']=='V']
@@ -512,7 +512,7 @@ if selecionar == 'Carteiras':
         #3 --------------- ROW
 
     except:
-          st.header('Digite uma conta valida')
+        st.header('Digite uma conta valida')
 
 
 
@@ -872,15 +872,15 @@ if selecionar == 'Divisão de operadores':
 
         #####       Limpando arquivo e retirando colunas
 
-        pl = pl.drop(columns='NOME')
-        saldo = saldo.drop(columns='NOME')
+        pl = pl.drop(columns='Nome')
+        saldo = saldo.drop(columns='Nome')
 
         
         controle =  controle.iloc[:,[1,2,6,7,12,16,17,18,-1]]
        
         
         
-        controle = controle.rename(columns = {'Unnamed: 2':'CONTA'})
+        controle = controle.rename(columns = {'Unnamed: 2':'Conta'})
 
         controle = controle.rename(columns= 
                                             {'Mesa de Operação':'Operador'})
@@ -889,11 +889,11 @@ if selecionar == 'Divisão de operadores':
 
         juncao = pd.merge(pl,saldo,
                         how='outer',
-                            on= 'CONTA')
+                            on= 'Conta')
         # Filtros para adicionar operadores
 
-        filtro_nov1 =  juncao.SALDO> 1000
-        filtro_nov2 = juncao.SALDO < 0
+        filtro_nov1 =  juncao.Saldo> 1000
+        filtro_nov2 = juncao.Saldo < 0
         
         juncao = juncao.loc[(
             filtro_nov1|filtro_nov2
@@ -901,19 +901,19 @@ if selecionar == 'Divisão de operadores':
 
 
         ###         Adicionando 00 para mesclar os arquivos ###
-        controle['CONTA']=controle['CONTA'].astype(str)
+        controle['Conta']=controle['Conta'].astype(str)
 
 
-        controle['CONTA'] = list(
+        controle['Conta'] = list(
             map(
-                lambda x:'00'+ x,controle['CONTA']
+                lambda x:'00'+ x,controle['Conta']
                 )
                     )
 
 
         arquivo_final = pd.merge(
             controle,juncao,
-            on='CONTA',
+            on='Conta',
             how= 'outer'
         )
             ####        Mesclando arquivos e adicionando variaveis
@@ -921,34 +921,34 @@ if selecionar == 'Divisão de operadores':
     # Filtros para adicionar operadores
 
         #Filtro Breno
-        filtro = (arquivo_final['VALOR']<350000) & (arquivo_final['Operador']=='Edu')
+        filtro = (arquivo_final['Valor']<350000) & (arquivo_final['Operador']=='Edu')
         arquivo_final.loc[filtro,'Operador'] ='Breno'
 
         #Filtro Edu
 
-        filtro2 =  filtro = (arquivo_final['VALOR']>350000) & (arquivo_final['Operador']=='Edu')
+        filtro2 =  filtro = (arquivo_final['Valor']>350000) & (arquivo_final['Operador']=='Edu')
         arquivo_final.loc[filtro2,'Operador'] = 'Edu'
 
         #filtro Bruno
 
-        filtro4 = (arquivo_final['VALOR']<350000) & (arquivo_final['Operador']=='Léo')
+        filtro4 = (arquivo_final['Valor']<350000) & (arquivo_final['Operador']=='Léo')
         arquivo_final.loc[filtro4,'Operador'] ='Bruno'
         
         # Filtro léo
-        filtro6  = (arquivo_final['VALOR']>350000) & (arquivo_final['Operador']=='Léo')
+        filtro6  = (arquivo_final['Valor']>350000) & (arquivo_final['Operador']=='Léo')
         arquivo_final.loc[filtro6,'Operador'] = 'Léo'
 
-        filtro7 = (arquivo_final['VALOR']>350000)&(arquivo_final['Operador'] =='Breno')
+        filtro7 = (arquivo_final['Valor']>350000)&(arquivo_final['Operador'] =='Breno')
         arquivo_final.loc[filtro7,'Operador'] = 'Edu'
 
-        filtro8 = (arquivo_final['VALOR']>350000)&(arquivo_final['Operador'] =='Bruno')
+        filtro8 = (arquivo_final['Valor']>350000)&(arquivo_final['Operador'] =='Bruno')
         arquivo_final.loc[filtro8,'Operador'] = 'Léo'
 
         
         
         #st.subheader('Este e o novo filtro')
         
-        filtro_de_saldo = ((arquivo_final['SALDO']>1000)|(arquivo_final['SALDO']<0))
+        filtro_de_saldo = ((arquivo_final['Saldo']>1000)|(arquivo_final['Saldo']<0))
         arquivo_final2 = arquivo_final.loc[filtro_de_saldo]
 
         arquivo_final2['Operador'] = arquivo_final2['Operador'].fillna('Checar conta')
@@ -960,13 +960,13 @@ if selecionar == 'Divisão de operadores':
         
         arquivo_final2 = arquivo_final2.reset_index()
         
-        arquivo_final2 = arquivo_final2.sort_values(by='SALDO',ascending=False)
+        arquivo_final2 = arquivo_final2.sort_values(by='Saldo',ascending=False)
         
         arquivo_final2 = arquivo_final2.rename(columns=
                                             {'Mesa de Operação.2':'Lembretes Mesa'})
 
         arquivo_final2 = arquivo_final2.rename(columns=
-                                            {'VALOR':'BTG PL'})
+                                            {'Valor':'BTG PL'})
         arquivo_final2 = arquivo_final2.rename(columns=
                                             {'Saldo':'Saldo Disponivel'})
         arquivo_final2 = arquivo_final2.rename(columns=
@@ -992,8 +992,6 @@ if selecionar == 'Divisão de operadores':
         #                     value=st.checkbox('arquivo_final2'
         #                                     )
         #                                     )
-
-
         barra1 = st.selectbox('Selecione o Operador',
                             options=arquivo_final2['Operador'].unique())
 
@@ -1002,7 +1000,7 @@ if selecionar == 'Divisão de operadores':
         def formatar_valor(valor):
             return "{:,.2f}".format(valor)
         
-        ajustar_decimais = ['SALDO','PL Planilha Controle','BTG PL']
+        ajustar_decimais = ['Saldo Disponivel','PL Planilha Controle','BTG PL']
         for coluna in ajustar_decimais:
             df7[coluna] = df7[coluna].apply(formatar_valor)
          
@@ -1134,10 +1132,10 @@ if selecionar == 'Analitico':
 
     planilha_controle = planilha_controle.drop(0)
     planilha_controle['Unnamed: 2'] =planilha_controle['Unnamed: 2'].map((lambda x: '00'+str(x))) 
-    planilha_final = pd.merge(posicao_btg,planilha_controle,left_on='CONTA',right_on='Unnamed: 2',how='outer').reset_index()
+    planilha_final = pd.merge(posicao_btg,planilha_controle,left_on='Conta',right_on='Unnamed: 2',how='outer').reset_index()
 
 
-    soma_dos_ativos_por_carteira = planilha_final.groupby(['Unnamed: 12','PRODUTO'])['VALOR BRUTO'].sum().reset_index()
+    soma_dos_ativos_por_carteira = planilha_final.groupby(['Unnamed: 12','Produto'])['Valor Bruto'].sum().reset_index()
     
   
 
@@ -1180,10 +1178,10 @@ if selecionar == 'Analitico':
         carteira_MOD_PREV_MOD,
         carteira_INC_PREV_MOD]
 
-    carteira_inc['Porcentagem'] = (carteira_inc['VALOR BRUTO']/carteira_inc['VALOR BRUTO'].sum())*100
+    carteira_inc['Porcentagem'] = (carteira_inc['Valor Bruto']/carteira_inc['Valor Bruto'].sum())*100
 
     for dfs in lista_para_incluir_coluna_de_porcentagem:
-        dfs['Porcentagem'] = (dfs['VALOR BRUTO']/dfs['VALOR BRUTO'].sum())*100
+        dfs['Porcentagem'] = (dfs['Valor Bruto']/dfs['Valor Bruto'].sum())*100
     for dfs in lista_remover_excecoes:
         dfs.drop(dfs[dfs['Porcentagem']<1].index, inplace=True) 
     
@@ -1224,8 +1222,8 @@ if selecionar == 'Analitico':
     
     
     def criando_graficos_rf_rv (df,title,color):
-        df['Renda Variavel'] = df.loc[df['PRODUTO'].isin(lista_acoes_em_caixa),'VALOR BRUTO'].sum()
-        df['Renda Fixa'] = df.loc[~df['PRODUTO'].isin(lista_acoes_em_caixa),'VALOR BRUTO'].sum()
+        df['Renda Variavel'] = df.loc[df['Produto'].isin(lista_acoes_em_caixa),'Valor Bruto'].sum()
+        df['Renda Fixa'] = df.loc[~df['Produto'].isin(lista_acoes_em_caixa),'Valor Bruto'].sum()
         df['Total RV RF'] = df['Renda Variavel'] + df['Renda Fixa']
         labels = ['Renda Variavel', 'Renda Fixa']
         values = [df['Renda Variavel'].sum(), df['Renda Fixa'].sum()]
@@ -1239,8 +1237,8 @@ if selecionar == 'Analitico':
 
         return df
     def criando_graficos_caixa (df,title,color):
-        df['Caixa'] = df.loc[df['PRODUTO'].isin(caixa),'VALOR BRUTO'].sum()
-        df['Ativos'] = df.loc[~df['PRODUTO'].isin(caixa),'VALOR BRUTO'].sum()
+        df['Caixa'] = df.loc[df['Produto'].isin(caixa),'Valor Bruto'].sum()
+        df['Ativos'] = df.loc[~df['Produto'].isin(caixa),'Valor Bruto'].sum()
         df['Total Caixa Ativos'] = df['Caixa'] + df['Ativos']
         labels = ['Caixa', 'Ativos']
         values = [df['Caixa'].sum(), df['Ativos'].sum()]
@@ -1275,8 +1273,8 @@ if selecionar == 'Analitico':
     def criando_graficos(carteira,padronizacao,titulo):
 
         figura = go.Figure(data=[go.Pie(
-            labels=carteira['PRODUTO'],
-            values=carteira['VALOR BRUTO'],
+            labels=carteira['Produto'],
+            values=carteira['Valor Bruto'],
             marker_colors=sunflowers_colors,
             scalegroup='one'
 

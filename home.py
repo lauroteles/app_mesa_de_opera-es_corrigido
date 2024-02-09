@@ -871,6 +871,9 @@ if selecionar == 'Divisão de operadores':
 
 
         #####       Limpando arquivo e retirando colunas
+        pl = pl.rename(columns={'CONTA':'Conta','NOME':'Nome','SALDO':'Saldo' })
+        saldo = saldo.rename(columns={'CONTA':'Conta','NOME':'Nome','SALDO':'Saldo'})
+
 
         pl = pl.drop(columns='Nome')
         saldo = saldo.drop(columns='Nome')

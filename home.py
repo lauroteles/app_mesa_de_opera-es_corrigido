@@ -166,7 +166,7 @@ if selecionar == 'Carteiras':
 
     #--------------------------------
     # --------Manipulação de arquivos
-   
+    arquivo1 = arquivo1.rename(columns={'CONTA':'Conta','PRODUTO':'Produto','ATIVO':'Ativo','VALOR BRUTO':'Valor Bruto','QUANTIDADE':'Quantidade'})
 
     arquivo2 = arquivo1.groupby(['Conta','Produto','Ativo'])[['Valor Bruto','Quantidade']].sum().reset_index('Conta')
 
@@ -871,7 +871,7 @@ if selecionar == 'Divisão de operadores':
 
 
         #####       Limpando arquivo e retirando colunas
-        pl = pl.rename(columns={'CONTA':'Conta','NOME':'Nome','SALDO':'Saldo' })
+        pl = pl.rename(columns={'CONTA':'Conta','NOME':'Nome','SALDO':'Saldo','VALOR':'Valor'})
         saldo = saldo.rename(columns={'CONTA':'Conta','NOME':'Nome','SALDO':'Saldo'})
 
 
@@ -1131,7 +1131,7 @@ if selecionar == 'Analitico':
 
     posicao_btg = posicao_original.iloc[:,[0,4,10]]
     planilha_controle = controle.iloc[:,[2,12,]]
-
+    posicao_btg = posicao_btg.rename(columns={'CONTA':'Conta','PRODUTO':'Produto','ATIVO':'Ativo','VALOR BRUTO':'Valor Bruto','QUANTIDADE':'Quantidade'})
 
     planilha_controle = planilha_controle.drop(0)
     planilha_controle['Unnamed: 2'] =planilha_controle['Unnamed: 2'].map((lambda x: '00'+str(x))) 

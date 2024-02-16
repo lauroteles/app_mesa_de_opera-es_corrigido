@@ -1060,10 +1060,10 @@ if selecionar == 'Divisão de operadores':
             horario_da_operacao_brasil = datetime.datetime.now(fuso_horario_brasil).strftime('%d-%m-%Y_%H')
 
             if numero_da_conta in arquivo_final2['Conta'].values:
-                nome_do_cliente = arquivo_final2.loc[arquivo_final2['CONTA'] == numero_da_conta, 'Nome'].iloc[0]
+                nome_do_cliente = arquivo_final2.loc[arquivo_final2['Conta'] == numero_da_conta, 'Nome'].iloc[0]
             # Verificar se o número_da_conta existe em controle
-            elif numero_da_conta in controle['CONTA'].values:
-                nome_do_cliente = controle.loc[controle['CONTA'] == numero_da_conta, 'Unnamed: 1'].iloc[0]
+            elif numero_da_conta in controle['Conta'].values:
+                nome_do_cliente = controle.loc[controle['Conta'] == numero_da_conta, 'Unnamed: 1'].iloc[0]
             else:
                 nome_do_cliente = ''
             numero_da_conta = str(numero_da_conta)    

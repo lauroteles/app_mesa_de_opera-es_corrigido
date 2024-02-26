@@ -22,26 +22,27 @@ t0 = time.perf_counter()
 
 st.set_page_config(layout='wide')
 
-paginas = 'Home','Carteiras','Produtos','Divisão de operadores','Analitico','Análise Tecnica'
+paginas = 'Home','Carteiras','Produtos','Divisão de operadores','Carteiras Co Admin','Analitico','Análise Tecnica',
 selecionar = st.sidebar.radio('Selecione uma opção', paginas)
 
 
 #---------------------------------- 
 # Variaveis globais
 @st.cache_data(ttl='3m')     
-def le_excel(x):
-    df = pd.read_excel(x)
+def le_excel(x,page,row):
+    df = pd.read_excel(x,page,skiprows=row)
     return df
 
-pl_original = le_excel('PL Total.xlsx')
-controle_original = le_excel('controle.xlsx')
-saldo_original = le_excel('Saldo.xlsx')
-posicao_original = le_excel('Posição.xlsx')
-produtos_original = le_excel('Produtos.xlsx')
-cura_original = le_excel('Curva_comdinheiro.xlsx')
-curva_de_inflacao = le_excel('Curva_inflação.xlsx')
-posicao_btg1 = le_excel('Posição.xlsx')
-planilha_controle1 = le_excel('controle.xlsx')
+pl_original = le_excel('PL Total.xlsx',0,0)
+controle_original = le_excel('controle.xlsx',0,0)
+saldo_original = le_excel('Saldo.xlsx',0,0)
+posicao_original = le_excel('Posição.xlsx',0,0)
+produtos_original = le_excel('Produtos.xlsx',0,0)
+cura_original = le_excel('Curva_comdinheiro.xlsx',0,0)
+curva_de_inflacao = le_excel('Curva_inflação.xlsx',0,0)
+posicao_btg1 = le_excel('Posição.xlsx',0,0)
+planilha_controle1 = le_excel('controle.xlsx',0,0)
+co_admin = le_excel('Controle de Contratos - Carteiras Co-Administradas.xlsx',1,1)
 
 pl = pl_original.copy()
 controle = controle_original.copy()
@@ -52,7 +53,7 @@ curva_base = cura_original.copy()
 curva_inflacao_copia = curva_de_inflacao.copy()
 posicao_btg = posicao_btg1.copy()
 planilha_controle = planilha_controle1.copy()
-
+controle_co_admin = co_admin.copy()
 
 #----------------------------------  ---------------------------------- ---------------------------------- ---------------------------------- 
 # Pagina de Carteiras
@@ -1507,12 +1508,50 @@ if selecionar == 'Análise Tecnica':
 
 
 
+pl = pl_original.copy()
+controle = controle_original.copy()
+saldo = saldo_original.copy()
+arquivo1 = posicao_original.copy()
+produtos = produtos_original.copy()
+curva_base = cura_original.copy()
+curva_inflacao_copia = curva_de_inflacao.copy()
+posicao_btg = posicao_btg1.copy()
+planilha_controle = planilha_controle1.copy()
+controle_co_admin = co_admin.copy()
+
+if selecionar == 'Carteiras Co Admin':
 
 
+    class Carteiras_co_admin():
+        def __init__(self,pl,controle_co_admin,saldo):
+            self.pl = pl
+            self.controle_co = controle_co_admin
+            self.saldo = saldo
+
+        def juntando_planilhas(self):
+            arquivo_final = pd.merge(self.pl,self.saldo, on='Conta',how='outer')  
+            controle_co_admin['Conta'] = self.controle_co['Conta'].astype(str).str[:-2].apply(lambda x: '00'+ x)
+            controle_co_admin_df = pd.DataFrame(controle_co_admin)
+            arquivo_final_completo = pd.merge(arquivo_final,controle_co_admin_df,on
+                                              ='Conta',how='right').iloc[:-5,[0,2,4,6,10,11,20,21,22,-1]].rename(columns={'Valor':'PL'})
+            coluna_final = arquivo_final_completo.columns[-1]
+
+            arquivo_final_completo = arquivo_final_completo.rename(columns={coluna_final:'PL Planilha Controle'}).iloc[:,[0,2,3,5,6,7,8,1,4,9]]
+
+            return arquivo_final_completo
+
+    if __name__=='__main__':
+    
+        ler_arquivos = Carteiras_co_admin(pl,controle_co_admin,saldo)            
+        dados_agregados = ler_arquivos.juntando_planilhas()
+
+        st.dataframe(dados_agregados)
+        #st.dataframe(controle_co_admin_)
+
+    print(controle_co_admin.info())        
 t1 = time.perf_counter()
 
 print(t1-t0)
-
 
 
 

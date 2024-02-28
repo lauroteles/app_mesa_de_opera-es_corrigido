@@ -63,7 +63,7 @@ controle_co_admin = co_admin.copy()
 #--------------------- EQUITIES
      
 
-equities = {'ARZZ3': 4.5,
+equities = equities = {'ARZZ3': 4.5,
             'ASAI3':5,
             'CSAN3':5.50,
             'CSED3':5,
@@ -108,16 +108,7 @@ small_caps = {
     'TUPY3':11,
     'WIZC3':5,
 }
-fii = {
-    'BTLG11':22.30,
-    'Caixa':6,
-    'HGLG11':22.30,
-    'KNCA11':7.25,
-   ' MALL11':7.75,
-   ' PLCR11':13.57,
-    'RURA11':7.26,
-    'TRXF11':13.57
-}
+
 
 dividendos = {
     'TAEE11':9,
@@ -128,6 +119,16 @@ dividendos = {
    ' CPLE6':16,
    ' TRPL4':5
     }
+fii = {
+    'BTLG11':22.30,
+    'Caixa':6,
+    'HGLG11':22.30,
+    'KNCA11':7.25,
+   ' MALL11':7.75,
+   ' PLCR11':13.57,
+    'RURA11':7.26,
+    'TRXF11':13.57
+}
 
 small_caps_dataframe = pd.DataFrame(list(small_caps.items()),columns=['Ativo','Proporção'])
 small_caps_dataframe['Proporção'] = small_caps_dataframe['Proporção']/100    
@@ -145,19 +146,19 @@ income_graf = pd.DataFrame(list(income.items()),columns=['Ativo','Proporção'])
 income_graf['Proporção'] = income_graf['Proporção']/100
     
     #---------------------- Moderada
-moderada = {ativo:0.75*income.get(ativo,0)+0.25*equities.get(ativo,0) for ativo in set(income)|set(equities)}
+moderada = {ativo:0.70*income.get(ativo,0)+0.30*equities.get(ativo,0) for ativo in set(income)|set(equities)}
 moderada_grafico = pd.DataFrame(list(moderada.items()),columns=['Ativo','Proporção'])
 moderada_grafico['Proporção'] = moderada_grafico['Proporção']/100
 
    
     #-------------------- Arrojada     
-arrojada = {ativo:0.60*income.get(ativo,0)+0.40*equities.get(ativo,0) for ativo in set(income)|set(equities)}   
+arrojada = {ativo:0.50*income.get(ativo,0)+0.50*equities.get(ativo,0) for ativo in set(income)|set(equities)}   
 arrojada_graf = pd.DataFrame(list(arrojada.items()),columns=['Ativo','Proporção'])
 arrojada_graf['Proporção'] = arrojada_graf['Proporção']/100
  
     #------------------ Conservadora
    
-conservadora = {ativo:0.87*income.get(ativo,0)+0.13*equities.get(ativo,0) for ativo in set(income)|set(equities)}   
+conservadora = {ativo:0.85*income.get(ativo,0)+0.15*equities.get(ativo,0) for ativo in set(income)|set(equities)}   
 conservadora_graf = pd.DataFrame(list(conservadora.items()),columns=['Ativo','Proporção'])
 conservadora_graf['Proporção'] = conservadora_graf['Proporção']/100
 
@@ -1159,7 +1160,7 @@ if selecionar == 'Analitico':
     carteira_dividendos = criando_df_para_grafico('DIV')
     carteira_MOD_PREV_MOD = criando_df_para_grafico('MOD/ PREV MOD')
     carteira_INC_PREV_MOD = criando_df_para_grafico('INC/ PREV MOD')
-
+ 
     lista_para_incluir_coluna_de_porcentagem = [
         carteira_inc,
         carteira_con,
@@ -1171,6 +1172,7 @@ if selecionar == 'Analitico':
         carteira_dividendos,
         carteira_MOD_PREV_MOD,
         carteira_INC_PREV_MOD]
+    
     lista_remover_excecoes = [
         carteira_inc,
         carteira_mod,
@@ -1188,7 +1190,7 @@ if selecionar == 'Analitico':
         dfs['Porcentagem'] = (dfs['Valor Bruto']/dfs['Valor Bruto'].sum())*100
     for dfs in lista_remover_excecoes:
         dfs.drop(dfs[dfs['Porcentagem']<1].index, inplace=True) 
-    
+
     carteira_con = carteira_con.drop(carteira_con[carteira_con['Porcentagem']<0.2].index)
 
     padronizacao_dos_graficos = dict(hole=0.4,
@@ -1203,6 +1205,16 @@ if selecionar == 'Analitico':
                  'rgb(175, 49, 35)', 'rgb(36, 73, 147)']
     cafe_colors =  ['rgb(146, 123, 21)', 'rgb(177, 180, 34)', 'rgb(206, 206, 40)',
                 'rgb(175, 51, 21)', 'rgb(35, 36, 21)']
+    colors_dark24 = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+                 '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf',
+                 '#5254a3', '#ff6f61', '#6b6b6b', '#738595', '#e71d36',
+                 '#ff9f1c', '#f4d35e', '#6a4c93', '#374649', '#8aaabb',
+                 '#f9f7f5', '#f9f7f5', '#f9f7f5', '#f9f7f5']
+    colors_dark_rainbow = ['#9400D3', '#4B0082', '#0000FF', '#00FF00', '#FFFF00',
+                       '#FF7F00', '#FF0000']
+    colors_dark_brewers = ['#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c']
+    colors_dark10 = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+                 '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
     lista_acoes_em_caixa = [
             'ARZZ3',
             'ASAI3',
@@ -1223,7 +1235,13 @@ if selecionar == 'Analitico':
         'BTG PACT TESOURO SELIC PREV FI RF REF DI',
         'TESOURO DIRETO - LFT',      
     ]
-    
+    small_caps = ['BPAC11','ENEV3','HBSA3','IFCM3','JALL3','KEPL3',
+    'MYPK3','PRIO3','SIMH3','TASA4','TUPY3','WIZC3']
+
+
+    #dividendos = ['TAEE11','VIVT3','BBSE3','ABCB4','VBBR3','CPLE6','TRPL4',]
+    dividendos = ['CDB','BTG PACTUAL TESOURO SELIC FI RF REF DI']
+        
     
     def criando_graficos_rf_rv (df,title,color):
         df['Renda Variavel'] = df.loc[df['Produto'].isin(lista_acoes_em_caixa),'Valor Bruto'].sum()
@@ -1255,6 +1273,21 @@ if selecionar == 'Analitico':
         st.plotly_chart(fig2,use_container_width=True)
 
         return df
+    def criando_graficos_caixa_div (df,title,color):
+        df['Caixa'] = df.loc[df['Produto'].isin(dividendos),'Valor Bruto'].sum()
+        df['Ativos'] = df.loc[~df['Produto'].isin(dividendos),'Valor Bruto'].sum()
+        df['Total Caixa Ativos'] = df['Caixa'] + df['Ativos']
+        labels = ['Caixa', 'Ativos']
+        values = [df['Caixa'].sum(), df['Ativos'].sum()]
+        colors = cafe_colors
+        fig2 = go.Figure(data=[go.Pie(labels=labels, values=values, marker=dict(colors=color))])
+        fig2.update_layout(title_text=title,
+                              title_x=0.2,
+                              title_font_size = 23,
+                              uniformtext_minsize=14,)
+        st.plotly_chart(fig2,use_container_width=True)
+
+        return df
     
 
 
@@ -1266,13 +1299,16 @@ if selecionar == 'Analitico':
         st.warning("Para caixa foram considerados: BTG PACT TESOURO SELIC PREV FI RF REF DI e TESOURO DIRETO - LFT")
         with col1:
             carteira_con_media_rv_rf = criando_graficos_rf_rv(carteira_con,'Conservadora',irises_colors)
-            carteira_arr_media_rv_rf = criando_graficos_rf_rv(carteira_arr,'Arrojada',cafe_colors)
-            carteira_inc_prevC_media_caixa = criando_graficos_caixa(carteira_INC_PREV_MOD,'Income Prev',night_colors)
+            carteira_arr_media_rv_rf = criando_graficos_rf_rv(carteira_arr,'Arrojada',colors_dark10)
+            carteira_inc_prevC_media_caixa = criando_graficos_caixa(carteira_INC_PREV_MOD,'Income Prev',colors_dark24)
+            carteira_dividendos_caixa = criando_graficos_caixa_div(carteira_dividendos,'Dividendos',night_colors)
+            carteira_smll_caixa = criando_graficos_caixa_div(carteira_small,'Small',colors_dark24)
         with col2:
-            carteira_mod_media_rv_rf = criando_graficos_rf_rv(carteira_mod,'Moderada',night_colors)
+            carteira_mod_media_rv_rf = criando_graficos_rf_rv(carteira_mod,'Moderada',colors_dark_rainbow)
             carteira_eqt_media_rv_rf = criando_graficos_rf_rv(carteira_equity,'Equity',cafe_colors)
-            carteira_INC_media_caixa = criando_graficos_caixa(carteira_inc,'Income',night_colors)
-            carteira_mod_prevC_media_caixa = criando_graficos_caixa(carteira_MOD_PREV_MOD,'Moderara Prev',night_colors)
+            carteira_INC_media_caixa = criando_graficos_caixa(carteira_inc,'Income',colors_dark_rainbow)
+            carteira_mod_prevC_media_caixa = criando_graficos_caixa(carteira_MOD_PREV_MOD,'Moderara Prev',colors_dark_brewers)
+
 
     def criando_graficos(carteira,padronizacao,titulo):
 

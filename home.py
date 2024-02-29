@@ -63,7 +63,7 @@ controle_co_admin = co_admin.copy()
 #--------------------- EQUITIES
      
 
-equities = equities = {'ARZZ3': 4.83,
+equities = {'ARZZ3': 4.83,
             'ASAI3':5.33,
             'CSAN3':5.83,
             'CSED3':5.33,

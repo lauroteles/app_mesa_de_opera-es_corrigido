@@ -63,22 +63,22 @@ controle_co_admin = co_admin.copy()
 #--------------------- EQUITIES
      
 
-equities = equities = {'ARZZ3': 4.5,
-            'ASAI3':5,
-            'CSAN3':5.50,
-            'CSED3':5,
-            'EGIE3':4.5,
-            'EQTL3':5.50,
-            'EZTC3':5.75,
-            'HYPE3':6.50,
-            'KEPL3':7.50,
-            'MULT3':4.50,
-            'PRIO3':8,
-            'PSSA3':5,
-            'SBSP3':4.25,
-            'SLCE3':8.50,
-            'VALE3':10,
-            'Caixa':10
+equities = equities = {'ARZZ3': 4.83,
+            'ASAI3':5.33,
+            'CSAN3':5.83,
+            'CSED3':5.33,
+            'EGIE3':4.83,
+            'EQTL3':5.83,
+            'EZTC3':6.08,
+            'HYPE3':6.83,
+            'KEPL3':7.83,
+            'MULT3':4.83,
+            'PRIO3':8.33,
+            'PSSA3':5.33,
+            'SBSP3':4.58,
+            'SLCE3':8.83,
+            'VALE3':10.38,
+            'Caixa':5
             }
 equities_graf= pd.DataFrame(list(equities.items()),columns=['Ativo','Proporção'])
 equities_graf['Proporção'] =equities_graf['Proporção']/100

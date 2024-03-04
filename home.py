@@ -61,7 +61,8 @@ controle_co_admin = co_admin.copy()
 
 
 #--------------------- EQUITIES
-     
+
+
 
 equities = {'ARZZ3': 4.83,
             'ASAI3':5.33,
@@ -882,8 +883,7 @@ if selecionar == 'Divisão de operadores':
 
         
         controle =  controle.iloc[:,[1,2,6,7,12,16,17,18,-1]]
-       
-        
+    
         
         controle = controle.rename(columns = {'Unnamed: 2':'Conta'})
 
@@ -895,6 +895,7 @@ if selecionar == 'Divisão de operadores':
         juncao = pd.merge(pl,saldo,
                         how='outer',
                             on= 'Conta')
+        st.dataframe(pl)
         # Filtros para adicionar operadores
 
         filtro_nov1 =  juncao.Saldo> 1000
@@ -907,13 +908,11 @@ if selecionar == 'Divisão de operadores':
 
         ###         Adicionando 00 para mesclar os arquivos ###
         controle['Conta']=controle['Conta'].astype(str)
+        juncao['Conta']=controle['Conta'].astype(str)
 
 
-        controle['Conta'] = list(
-            map(
-                lambda x:'00'+ x,controle['Conta']
-                )
-                    )
+        juncao['Conta'] = list(map(lambda x:'00'+ x,juncao['Conta']))
+        controle['Conta'] = list(map(lambda x:'00'+ x,controle['Conta']))
 
 
         arquivo_final = pd.merge(
@@ -926,31 +925,29 @@ if selecionar == 'Divisão de operadores':
     # Filtros para adicionar operadores
 
         #Filtro Breno
-        filtro = (arquivo_final['Valor']<350000) & (arquivo_final['Operador']=='Edu')
+        filtro = (arquivo_final['Valor']<250000) & (arquivo_final['Operador']=='Bruno')
         arquivo_final.loc[filtro,'Operador'] ='Breno'
 
         #Filtro Edu
 
-        filtro2 =  filtro = (arquivo_final['Valor']>350000) & (arquivo_final['Operador']=='Edu')
-        arquivo_final.loc[filtro2,'Operador'] = 'Edu'
+        filtro2 =  filtro = (arquivo_final['Valor']>250000) & (arquivo_final['Operador']=='Bruno')
+        arquivo_final.loc[filtro2,'Operador'] = 'Bruno'
 
         #filtro Bruno
 
-        filtro4 = (arquivo_final['Valor']<350000) & (arquivo_final['Operador']=='Léo')
-        arquivo_final.loc[filtro4,'Operador'] ='Bruno'
+        filtro4 = (arquivo_final['Valor']<200000) & (arquivo_final['Operador']=='Léo')
+        arquivo_final.loc[filtro4,'Operador'] ='Augusto'
         
         # Filtro léo
-        filtro6  = (arquivo_final['Valor']>350000) & (arquivo_final['Operador']=='Léo')
+        filtro6  = (arquivo_final['Valor']>200000) & (arquivo_final['Operador']=='Léo')
         arquivo_final.loc[filtro6,'Operador'] = 'Léo'
 
-        filtro7 = (arquivo_final['Valor']>350000)&(arquivo_final['Operador'] =='Breno')
-        arquivo_final.loc[filtro7,'Operador'] = 'Edu'
+        filtro7 = (arquivo_final['Valor']>250000)&(arquivo_final['Operador'] =='Bruno')
+        arquivo_final.loc[filtro7,'Operador'] = 'Bruno'
 
-        filtro8 = (arquivo_final['Valor']>350000)&(arquivo_final['Operador'] =='Bruno')
-        arquivo_final.loc[filtro8,'Operador'] = 'Léo'
-
-        
-        
+        filtro8 = (arquivo_final['Valor']>200000)&(arquivo_final['Operador'] =='Léo')
+        arquivo_final.loc[filtro8,'Operador'] = 'Augusto'
+        st.dataframe(arquivo_final)
         #st.subheader('Este e o novo filtro')
         
         filtro_de_saldo = ((arquivo_final['Saldo']>1000)|(arquivo_final['Saldo']<0))
@@ -983,11 +980,11 @@ if selecionar == 'Divisão de operadores':
                                             {'Unnamed: 12':'Perfil da Carteira'})
         arquivo_final2 = arquivo_final2.rename(columns=
                                     {'Unnamed: 35':'PL Desatualizado',
-                                     'Unnamed: 41':'PL Planilha Controle'})
+                                     'Unnamed: 80':'PL Planilha Controle'})
         
         arquivo_final2 = arquivo_final2.loc[(arquivo_final2['Status'] == 'Inativo') |(arquivo_final2['Status'] == 'Ativo') | (arquivo_final2['Status'] == 'Pode Operar')| (arquivo_final2['Status'] == 'Checar conta')]
- 
-        
+
+
         arquivo_final2 = arquivo_final2.iloc[:,[2,1,11,4,5,6,7,8,9,10,3]]
 
 

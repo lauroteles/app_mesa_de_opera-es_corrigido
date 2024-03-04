@@ -999,7 +999,7 @@ if selecionar == 'Divisão de operadores':
         def formatar_valor(valor):
             return "{:,.2f}".format(valor)
         
-        ajustar_decimais = ['Saldo Disponivel','PL Planilha Controle','BTG PL']
+        ajustar_decimais = ['Saldo Disponivel','BTG PL']
         for coluna in ajustar_decimais:
             df7[coluna] = df7[coluna].apply(formatar_valor)
          

@@ -895,7 +895,6 @@ if selecionar == 'Divisão de operadores':
         juncao = pd.merge(pl,saldo,
                         how='outer',
                             on= 'Conta')
-        st.dataframe(pl)
         # Filtros para adicionar operadores
 
         filtro_nov1 =  juncao.Saldo> 1000

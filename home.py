@@ -16,7 +16,8 @@ import xlsxwriter as xlsxwriter
 import datetime
 import time
 import pytz
-
+import divisao_de_operadores
+from divisao_de_operadores import Divisao_de_contas
 
 t0 = time.perf_counter()
 
@@ -871,252 +872,34 @@ if selecionar == 'Produtos':
 #---------------------------------- ---------------------------------- ---------------------------------- ---------------------------------- 
 
 if selecionar == 'Divisão de operadores':
-
-
-        #####       Limpando arquivo e retirando colunas
-        pl = pl.rename(columns={'CONTA':'Conta','NOME':'Nome','SALDO':'Saldo','VALOR':'Valor'})
-        saldo = saldo.rename(columns={'CONTA':'Conta','NOME':'Nome','SALDO':'Saldo'})
-
-
-        pl = pl.drop(columns='Nome')
-        saldo = saldo.drop(columns='Nome')
-
-        
-        controle =  controle.iloc[:,[1,2,6,7,12,16,17,18,-1]]
     
-        
-        controle = controle.rename(columns = {'Unnamed: 2':'Conta'})
+    arquivo1 = Divisao_de_contas()
+    arquivo_compilado = arquivo1.limpando_dados()
+    filtrando_saldo = arquivo1.filtrando_dados_e_separando_operadores(arquivo_compilado=arquivo_compilado)
 
-        controle = controle.rename(columns= 
-                                            {'Mesa de Operação':'Operador'})
+    col1,col2 = st.columns(2)
 
-        ####        Mesclando arquivos e adicionando variaveis
-
-        juncao = pd.merge(pl,saldo,
-                        how='outer',
-                            on= 'Conta')
-        # Filtros para adicionar operadores
-
-        filtro_nov1 =  juncao.Saldo> 1000
-        filtro_nov2 = juncao.Saldo < 0
-        
-        juncao = juncao.loc[(
-            filtro_nov1|filtro_nov2
-            )]
-
-
-        ###         Adicionando 00 para mesclar os arquivos ###
-        controle['Conta']=controle['Conta'].astype(str)
-        juncao['Conta']=controle['Conta'].astype(str)
-
-
-        juncao['Conta'] = list(map(lambda x:'00'+ x,juncao['Conta']))
-        controle['Conta'] = list(map(lambda x:'00'+ x,controle['Conta']))
-
-
-        arquivo_final = pd.merge(
-            controle,juncao,
-            on='Conta',
-            how= 'outer'
-        )
-            ####        Mesclando arquivos e adicionando variaveis
-
-    # Filtros para adicionar operadores
-
-        #Filtro Breno
-        filtro = (arquivo_final['Valor']<250000) & (arquivo_final['Operador']=='Bruno')
-        arquivo_final.loc[filtro,'Operador'] ='Breno'
-
-        #Filtro Edu
-
-        filtro2 =  filtro = (arquivo_final['Valor']>250000) & (arquivo_final['Operador']=='Bruno')
-        arquivo_final.loc[filtro2,'Operador'] = 'Bruno'
-
-        #filtro Bruno
-
-        filtro4 = (arquivo_final['Valor']<200000) & (arquivo_final['Operador']=='Léo')
-        arquivo_final.loc[filtro4,'Operador'] ='Augusto'
-        
-        # Filtro léo
-        filtro6  = (arquivo_final['Valor']>200000) & (arquivo_final['Operador']=='Léo')
-        arquivo_final.loc[filtro6,'Operador'] = 'Léo'
-
-        filtro7 = (arquivo_final['Valor']>250000)&(arquivo_final['Operador'] =='Bruno')
-        arquivo_final.loc[filtro7,'Operador'] = 'Bruno'
-
-        filtro8 = (arquivo_final['Valor']>200000)&(arquivo_final['Operador'] =='Léo')
-        arquivo_final.loc[filtro8,'Operador'] = 'Augusto'
-
-        #st.subheader('Este e o novo filtro')
-        
-        filtro_de_saldo = ((arquivo_final['Saldo']>1000)|(arquivo_final['Saldo']<0))
-        arquivo_final2 = arquivo_final.loc[filtro_de_saldo]
-
-        arquivo_final2['Operador'] = arquivo_final2['Operador'].fillna('Checar conta')
-        arquivo_final2['Backoffice/ Mesa'] = arquivo_final2['Backoffice/ Mesa'].fillna('Checar conta')
+    with col1:
+        seletor_operador = st.selectbox('Operadores',options=filtrando_saldo['Operador'].unique())
+        filtrando_saldo = filtrando_saldo.loc[filtrando_saldo['Operador']==seletor_operador]
     
-       
-        #### Criando funcao para alterar o nome dos operardores de acordo com criterios #### 
-    
-        
-        arquivo_final2 = arquivo_final2.reset_index()
-        
-        arquivo_final2 = arquivo_final2.sort_values(by='Saldo',ascending=False)
-        
-        arquivo_final2 = arquivo_final2.rename(columns=
-                                            {'Mesa de Operação.2':'Lembretes Mesa'})
-
-        arquivo_final2 = arquivo_final2.rename(columns=
-                                            {'Valor':'BTG PL'})
-        arquivo_final2 = arquivo_final2.rename(columns=
-                                            {'Saldo':'Saldo Disponivel'})
-        arquivo_final2 = arquivo_final2.rename(columns=
-                                            {'Unnamed: 1':'Nome'})
-        arquivo_final2 = arquivo_final2.rename(columns=
-                                            {'Backoffice/ Mesa':'Status'})
-        #>>>>25/10  'Backoffice/ Mesa'
-        arquivo_final2 = arquivo_final2.rename(columns=
-                                            {'Unnamed: 12':'Perfil da Carteira'})
-        arquivo_final2 = arquivo_final2.rename(columns=
-                                    {'Unnamed: 35':'PL Desatualizado',
-                                     #'Unnamed: 80':'PL Planilha Controle'
-                                     })
-        
-        arquivo_final2 = arquivo_final2.loc[(arquivo_final2['Status'] == 'Inativo') |(arquivo_final2['Status'] == 'Ativo') | (arquivo_final2['Status'] == 'Pode Operar')| (arquivo_final2['Status'] == 'Checar conta')]
-
-
-        arquivo_final2 = arquivo_final2.iloc[:,[2,1,11,4,5,6,7,8,9,10,3]]
-
-
-    
-
-
-        barra1 = st.selectbox('Selecione o Operador',
-                            options=arquivo_final2['Operador'].unique())
-
-        df7 = arquivo_final2.loc[arquivo_final2['Operador'] == barra1]
-        df6 = arquivo_final2['Operador'].value_counts()
-        def formatar_valor(valor):
-            return "{:,.2f}".format(valor)
-        
-        ajustar_decimais = ['Saldo Disponivel','BTG PL']
-        for coluna in ajustar_decimais:
-            df7[coluna] = df7[coluna].apply(formatar_valor)
-         
-
-
-        cores = {'Inativo':'background-color: yellow',
+    cores = {'Inativo':'background-color: yellow',
             'Ativo':'background-color: green',
             'Pode Operar':'background-color: green',
             'Checar conta':'background-color: red'}
-
-        # data_frame_of = st.data_editor(df7,
-        #                             width=2000,
-        #                             height=500,
-        #                             num_rows='dynamic')
         
+    
+    st.dataframe(filtrando_saldo.style.applymap(lambda x: cores[x], subset=['Status']),use_container_width=True)
 
-        st.dataframe(df7.style.applymap(lambda x: cores[x], subset=['Status']),use_container_width=True)
-         
-        if arquivo_final2 is not None:
-            
-            
-            # Use io.BytesIO para criar um buffer de bytes
-            output4 = io.BytesIO()
+    contas_faltantes = arquivo1.contas_nao_encontradas(arquivo_compilado=arquivo_compilado)
 
-            # Salve o DataFrame no buffer no formato XLSX
-            with pd.ExcelWriter(output4, engine='xlsxwriter') as writer:
-                arquivo_final2.to_excel(writer,
-                                            sheet_name='Divisão_de_operadores.xlsx',
-                                              index=False)
-            
-            # Crie um link para download
-            output4.seek(0)
-            st.download_button(
-                label="Exportar dados",
-                data=output4,
-                file_name='Dvisão de contas por operador.xlsx',
-                key='download_button'
-            )
-        st.markdown("<br>",unsafe_allow_html=True)
-        st.markdown("<br>",unsafe_allow_html=True)
-
-        col1,col2,col3,col4,col5 = st.columns(5)
-        print(controle.info())
-        class Contas_Operadas:
-            def __init__(self, numero_da_conta, nome_do_cliente, operador_da_conta, horario_da_operação_brasil):
-                self.numero_da_conta = numero_da_conta
-                self.nome_do_cliente = nome_do_cliente
-                self.operador_da_conta = operador_da_conta
-                self.horario_da_operação = horario_da_operação_brasil
-
-        def processar_registro_de_conta_e_operador_resposavel(numero_da_conta,operador_da_conta):
-
-            fuso_horario_brasil = pytz.timezone('America/Sao_Paulo')
-            horario_da_operacao_brasil = datetime.datetime.now(fuso_horario_brasil).strftime('%d-%m-%Y_%H')
-
-            if numero_da_conta in arquivo_final2['Conta'].values:
-                nome_do_cliente = arquivo_final2.loc[arquivo_final2['Conta'] == numero_da_conta, 'Nome'].iloc[0]
-            # Verificar se o número_da_conta existe em controle
-            elif numero_da_conta in controle['Conta'].values:
-                nome_do_cliente = controle.loc[controle['Conta'] == numero_da_conta, 'Unnamed: 1'].iloc[0]
-            else:
-                nome_do_cliente = ''
-            numero_da_conta = str(numero_da_conta)    
-            conta_operada = Contas_Operadas(numero_da_conta,nome_do_cliente,operador_da_conta,horario_da_operacao_brasil)
-            excel_file = 'contas_operadas.xlsx'
-            try:
-                df_existing = pd.read_excel(excel_file)
-                df_new = pd.DataFrame([conta_operada.__dict__]).copy()
-                df_combined = pd.concat([df_existing,df_new],ignore_index=True)
-            except FileNotFoundError:
-                ''
-
-            df_combined.to_excel(excel_file,index=False)
-
-            if botao_de_registro:
-                st.success(f'Operador e conta registrada')
+    if contas_faltantes is not None:
+        st.subheader('Checar Contas')
+        st.dataframe(contas_faltantes)
+    else:
+        ''
 
 
-        possiveis_operadores_para_registro = ['Breno','Edu','Leo','Bruno']        
-        with col1:numero_da_conta = st.text_input('Numero da Conta')
-        with col1:operador_da_conta = st.selectbox('Quem operou',possiveis_operadores_para_registro),
-        botao_de_registro = st.button('registrar Conta Operada',type='primary')
-
-        st.markdown("<br>",unsafe_allow_html=True)
-        if botao_de_registro and numero_da_conta and operador_da_conta:
-            processar_registro_de_conta_e_operador_resposavel(numero_da_conta,operador_da_conta)
-
-
-        contas_operadas = pd.read_excel('contas_operadas.xlsx')
-        contas_operadas = contas_operadas.sort_index(ascending = False)
-        contas_operadas['horario_da_operação'] = pd.to_datetime(contas_operadas['horario_da_operação'],format='%d-%m-%Y_%H',errors='coerce')
-
-        contas_operadas_today = contas_operadas.loc[contas_operadas['horario_da_operação'].dt.date == datetime.datetime.now().date()]
-        contas_operadas_today = contas_operadas_today.sort_values(by='horario_da_operação', ascending=False)
-        
-        st.dataframe(contas_operadas_today)
-
-        if arquivo_final2 is not None:
-            
-            
-            # Use io.BytesIO para criar um buffer de bytes
-            output12 = io.BytesIO()
-
-            # Salve o DataFrame no buffer no formato XLSX
-            with pd.ExcelWriter(output12, engine='xlsxwriter') as writer:
-                contas_operadas.to_excel(writer,
-                                            sheet_name='Contas_operadas.xlsx',
-                                              index=False)
-            
-            # Crie um link para download
-            output12.seek(0)
-            st.download_button(
-                label="Exportar dados",
-                data=output12,
-                file_name='Contas_operadas.xlsx',
-                key='download_button_contas_operadas',
-            )                  
 #----------------------------------  ---------------------------------- ---------------------------------- ---------------------------------- 
 # Pagina de Analise
 #---------------------------------- ---------------------------------- ---------------------------------- ---------------------------------- 

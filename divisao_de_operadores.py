@@ -13,7 +13,7 @@ class Divisao_de_contas():
 
         self.controle = self.controle.iloc[:-5,[1,2,6,7,12,16,17,18,-1]].drop(0).rename(columns={
             'Unnamed: 1':'Nome','Unnamed: 2':'Conta','Mesa de Operação':'Operador','Backoffice/ Mesa':'Status','Unnamed: 12':'Perfil da carteira',
-            'Mesa de Operação.1':'Avisos Mesa','Gestão/ Head comercial':'Avisos comercial','Backoffice.2 ':'Avisos Backoffice','Unnamed: 80':'PL Controle'
+            'Mesa de Operação.1':'Avisos Mesa','Gestão/ Head comercial':'Avisos comercial','Backoffice.2 ':'Avisos Backoffice',#'Unnamed: 80':'PL Controle'
         })
         self.controle['Conta'] = self.controle['Conta'].astype(str).apply(lambda x: '00'+x)
 
@@ -36,7 +36,7 @@ class Divisao_de_contas():
 
         self.filtrando_saldo.loc[(self.filtrando_saldo['Valor']>200000) & (self.filtrando_saldo['Operador'] == 'Augusto'),'Operador'] = 'Léo'
         self.filtrando_saldo.loc[(self.filtrando_saldo['Valor']>250000) & (self.filtrando_saldo['Operador'] == 'Breno'),'Operador'] = 'Bruno'
-        colunas_ajustar_decimal = ['Saldo','PL Controle','Valor']
+        colunas_ajustar_decimal = ['Saldo','Valor']
         for coluna in colunas_ajustar_decimal:
             self.filtrando_saldo[coluna] = self.filtrando_saldo[coluna].apply(lambda x: '{:,.2f}'.format(x))
 

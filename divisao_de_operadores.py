@@ -9,9 +9,9 @@ class Divisao_de_contas():
 
 
     def limpando_dados(self):
-        self.controle = pd.read_excel(r'C:\Users\lauro.telles\Desktop\Mesa_app_3\controle.xlsx')
-        self.saldo = pd.read_excel(r'C:\Users\lauro.telles\Desktop\Mesa_app_3\Saldo.xlsx')
-        self.pl = pd.read_excel(r'C:\Users\lauro.telles\Desktop\Mesa_app_3\PL Total.xlsx')
+        self.controle = pd.read_excel('controle.xlsx')
+        self.saldo = pd.read_excel('Saldo.xlsx')
+        self.pl = pd.read_excel('PL Total.xlsx')
 
         
         self.controle = self.controle.iloc[:-5,[1,2,6,7,12,16,17,18,-1]].drop(0).rename(columns={

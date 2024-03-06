@@ -1334,7 +1334,6 @@ controle_co_admin = co_admin.copy()
 
 if selecionar == 'Carteiras Co Admin':
 
-
     class Carteiras_co_admin():
         def __init__(self,pl,controle_co_admin,saldo):
             self.pl = pl
@@ -1346,10 +1345,10 @@ if selecionar == 'Carteiras Co Admin':
             controle_co_admin['Conta'] = self.controle_co['Conta'].astype(str).str[:-2].apply(lambda x: '00'+ x)
             controle_co_admin_df = pd.DataFrame(controle_co_admin)
             arquivo_final_completo = pd.merge(arquivo_final,controle_co_admin_df,on
-                                              ='Conta',how='right').iloc[:-5,[0,2,4,6,10,11,20,21,22,-1]].rename(columns={'Valor':'PL'})
+                                              ='Conta',how='right').iloc[:-5,[0,2,4,6,10,16,11,20,21,22,-1]].rename(columns={'Valor':'PL'})
             coluna_final = arquivo_final_completo.columns[-1]
 
-            arquivo_final_completo = arquivo_final_completo.rename(columns={coluna_final:'PL Planilha Controle'}).iloc[:,[0,2,3,5,6,7,8,1,4,9]]
+            arquivo_final_completo = arquivo_final_completo.rename(columns={coluna_final:'PL Planilha Controle'}).iloc[:,[0,2,3,5,6,7,8,1,4,9,10]]
 
             return arquivo_final_completo
 
@@ -1357,9 +1356,8 @@ if selecionar == 'Carteiras Co Admin':
     
         ler_arquivos = Carteiras_co_admin(pl,controle_co_admin,saldo)            
         dados_agregados = ler_arquivos.juntando_planilhas()
-
+        print(dados_agregados)
         st.dataframe(dados_agregados)
-        #st.dataframe(controle_co_admin_)
 
     print(controle_co_admin.info())        
 t1 = time.perf_counter()

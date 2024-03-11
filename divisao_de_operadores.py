@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 
+@st.cache_data(ttl='3m')     
+def le_excel_1(x):
+    df = pd.read_excel(x)
+    return df
 
 class Divisao_de_contas():
     def __init__(self):
@@ -9,9 +13,9 @@ class Divisao_de_contas():
 
 
     def limpando_dados(self):
-        self.controle = pd.read_excel('controle.xlsx')
-        self.saldo = pd.read_excel('Saldo.xlsx')
-        self.pl = pd.read_excel('PL Total.xlsx')
+        self.controle = le_excel_1('controle.xlsx')
+        self.saldo = le_excel_1('Saldo.xlsx')
+        self.pl = le_excel_1('PL Total.xlsx')
 
         
         self.controle = self.controle.iloc[:-5,[1,2,6,7,12,16,17,18,-1]].drop(0).rename(columns={
@@ -20,8 +24,8 @@ class Divisao_de_contas():
         })
         self.controle['Conta'] = self.controle['Conta'].astype(str).apply(lambda x: '00'+x)
 
-        self.saldo = pd.read_excel('Saldo.xlsx').iloc[:,[0,2]]
-        self.pl = pd.read_excel('PL Total.xlsx').iloc[:,[0,2]]
+        self.saldo = le_excel_1('Saldo.xlsx').iloc[:,[0,2]]
+        self.pl = le_excel_1('PL Total.xlsx').iloc[:,[0,2]]
 
         self.arquivo_compilado = pd.merge(self.saldo,self.pl,on='Conta',how='outer').merge(self.controle,on='Conta',how='outer').iloc[:,[0,3,1,5,6,7,8,9,10,2,4]]
         return self.arquivo_compilado       

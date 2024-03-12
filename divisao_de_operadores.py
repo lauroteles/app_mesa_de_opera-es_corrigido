@@ -2,34 +2,32 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 
-@st.cache_data(ttl='3m')     
-def le_excel_1(x):
-    df = pd.read_excel(x)
-    return df
+
 
 class Divisao_de_contas():
     def __init__(self):
         print('O programa iniciou')
 
 
-    def limpando_dados(self):
-        self.controle = le_excel_1('controle.xlsx')
-        self.saldo = le_excel_1('Saldo.xlsx')
-        self.pl = le_excel_1('PL Total.xlsx')
+    def limpando_dados(self,controle,saldo,pl):
+        self.controle = controle
+        self.saldo = saldo
+        self.pl =  pl
 
         
         self.controle = self.controle.iloc[:-5,[1,2,6,7,12,16,17,18,-1]].drop(0).rename(columns={
             'Unnamed: 1':'Nome','Unnamed: 2':'Conta','Mesa de Operação':'Operador','Backoffice/ Mesa':'Status','Unnamed: 12':'Perfil da carteira',
-            'Mesa de Operação.1':'Avisos Mesa','Gestão/ Head comercial':'Avisos comercial','Backoffice.2 ':'Avisos Backoffice','Unnamed: 42':'PL Controle'
+            'Mesa de Operação.1':'Avisos Mesa','Gestão/ Head comercial':'Avisos comercial','Backoffice.2 ':'Avisos Backoffice','Unnamed: 80':'PL Controle'
         })
-        self.controle['Conta'] = self.controle['Conta'].astype(str).apply(lambda x: '00'+x)
+        self.controle['Conta'] = self.controle['Conta'].astype(str).apply(lambda x: '00'+x).str[:-2]
 
-        self.saldo = le_excel_1('Saldo.xlsx').iloc[:,[0,2]]
-        self.pl = le_excel_1('PL Total.xlsx').iloc[:,[0,2]]
+        self.saldo = saldo.iloc[:,[0,2]]
+        self.pl = pl.iloc[:,[0,2]]
 
         self.arquivo_compilado = pd.merge(self.saldo,self.pl,on='Conta',how='outer').merge(self.controle,on='Conta',how='outer').iloc[:,[0,3,1,5,6,7,8,9,10,2,4]]
-        return self.arquivo_compilado       
 
+        return self.arquivo_compilado       
+        
     def filtrando_dados_e_separando_operadores(self,arquivo_compilado):
 
         self.arquivo_compilado = arquivo_compilado
@@ -43,7 +41,8 @@ class Divisao_de_contas():
 
         self.filtrando_saldo.loc[(self.filtrando_saldo['Valor']>200000) & (self.filtrando_saldo['Operador'] == 'Augusto'),'Operador'] = 'Léo'
         self.filtrando_saldo.loc[(self.filtrando_saldo['Valor']>250000) & (self.filtrando_saldo['Operador'] == 'Breno'),'Operador'] = 'Bruno'
-        colunas_ajustar_decimal = ['Saldo','Valor']
+        colunas_ajustar_decimal = ['Saldo','PL Controle','Valor']
+
         for coluna in colunas_ajustar_decimal:
             self.filtrando_saldo[coluna] = self.filtrando_saldo[coluna].apply(lambda x: '{:,.2f}'.format(x))
 
@@ -56,6 +55,5 @@ class Divisao_de_contas():
         self.contas_nao_encontrados = arquivo_compilado[(arquivo_compilado['Operador'].isnull())&(arquivo_compilado['Saldo']>1000)|(arquivo_compilado['Saldo']<0)]
         self.contas_nao_encontrados = self.contas_nao_encontrados[~self.contas_nao_encontrados['Conta'].isin(contas_co_admin)]
         return self.contas_nao_encontrados
-
 
 

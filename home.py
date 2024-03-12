@@ -872,11 +872,16 @@ if selecionar == 'Produtos':
 #---------------------------------- ---------------------------------- ---------------------------------- ---------------------------------- 
 
 if selecionar == 'Divisão de operadores':
-    
-    arquivo1 = Divisao_de_contas()
-    arquivo_compilado = arquivo1.limpando_dados()
-    filtrando_saldo = arquivo1.filtrando_dados_e_separando_operadores(arquivo_compilado=arquivo_compilado)
+    saldo_original1 = le_excel('Saldo.xlsx',0,0)
+    pl_original1 = le_excel('PL Total.xlsx',0,0)
+    controle_2 = le_excel('controle.xlsx',0,1)
 
+    arquivo1 = Divisao_de_contas()
+
+    arquivo_compilado = arquivo1.limpando_dados(controle=controle_2,saldo=saldo_original1,pl=pl_original1)
+
+    filtrando_saldo = arquivo1.filtrando_dados_e_separando_operadores(arquivo_compilado=arquivo_compilado)
+    
     col1,col2 = st.columns(2)
 
     with col1:
@@ -1333,6 +1338,7 @@ planilha_controle = planilha_controle1.copy()
 controle_co_admin = co_admin.copy()
 
 if selecionar == 'Carteiras Co Admin':
+
 
     class Carteiras_co_admin():
         def __init__(self,pl,controle_co_admin,saldo):

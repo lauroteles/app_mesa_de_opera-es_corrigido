@@ -41,7 +41,7 @@ class Divisao_de_contas():
 
         self.filtrando_saldo.loc[(self.filtrando_saldo['Valor']>200000) & (self.filtrando_saldo['Operador'] == 'Augusto'),'Operador'] = 'Léo'
         self.filtrando_saldo.loc[(self.filtrando_saldo['Valor']>250000) & (self.filtrando_saldo['Operador'] == 'Breno'),'Operador'] = 'Bruno'
-        colunas_ajustar_decimal = ['Saldo','PL Controle','Valor']
+        colunas_ajustar_decimal = ['Saldo','Valor']
 
         for coluna in colunas_ajustar_decimal:
             self.filtrando_saldo[coluna] = self.filtrando_saldo[coluna].apply(lambda x: '{:,.2f}'.format(x))

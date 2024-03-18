@@ -44,6 +44,8 @@ curva_de_inflacao = le_excel('Curva_inflação.xlsx',0,0)
 posicao_btg1 = le_excel('Posição.xlsx',0,0)
 planilha_controle1 = le_excel('controle.xlsx',0,0)
 co_admin = le_excel('Controle de Contratos - Carteiras Co-Administradas.xlsx',1,1)
+controle_psicao = le_excel('controle.xlsx',0,1)
+rentabilidade = le_excel('Rentabilidade (1).xlsx',0,0)
 
 pl = pl_original.copy()
 controle = controle_original.copy()
@@ -61,462 +63,92 @@ controle_co_admin = co_admin.copy()
 #---------------------------------- ---------------------------------- ---------------------------------- ---------------------------------- 
 
 
-#--------------------- EQUITIES
+colors_dark_rainbow = ['#9400D3', '#4B0082', '#0000FF', '#00FF00', '#FFFF00',
+                       '#FF7F00', '#FF0000']
+colors_dark_brewers = ['#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c']
 
+equities = {'ARZZ3': 5,'ASAI3':6.50,'BBSE3':5,'CPFE3':5.50,'EGIE3':5.50,'EZTC3':6.50,'HYPE3':8.00,'KEPL3':8.75,
+            'LEVE3':5,'PRIO3':8,'PSSA3':2.50,'SBSP3':4,'SLCE3':9.75,'VALE3':10,'VIVT3':5,'Caixa':5}
 
+income = {'POS':15,'Inflação':38,'PRE':44,'FundoDI':3}
 
-equities = {'ARZZ3': 4.83,
-            'ASAI3':5.33,
-            'CSAN3':5.83,
-            'CSED3':5.33,
-            'EGIE3':4.83,
-            'EQTL3':5.83,
-            'EZTC3':6.08,
-            'HYPE3':6.83,
-            'KEPL3':7.83,
-            'MULT3':4.83,
-            'PRIO3':8.33,
-            'PSSA3':5.33,
-            'SBSP3':4.58,
-            'SLCE3':8.83,
-            'VALE3':10.38,
-            'Caixa':5
-            }
-equities_graf= pd.DataFrame(list(equities.items()),columns=['Ativo','Proporção'])
-equities_graf['Proporção'] =equities_graf['Proporção']/100
+small_caps = {'BPAC11':10,'ENEV3':4,'HBSA3':7,'IFCM3':5,'IFCM3':5,'JALL3':10,'KEPL3':12,'MYPK3':5,'PRIO3':12,'SIMH3':8,'TASA4':8,'TUPY3':11,'WIZC3':5}
 
-     
-    #--------------------- iNCOME
-   
+dividendos = {'TAEE11':9,'VIVT3':12,'BBSE3':17, 'ABCB4':16,' VBBR3':15,' CPLE6':16,' TRPL4':5}
 
-income = {
-    'POS':15,
-    'Inflação':38,
-    'PRE':44,
-    'FundoDI':3
-    }
+fii = {'BTLG11':22.30,'Caixa':6,'HGLG11':22.30,'KNCA11':7.25,'MALL11':7.75,'PLCR11':13.57,'RURA11':7.26,'TRXF11':13.57}
 
-small_caps = {
-    'BPAC11':10,
-    'ENEV3':4,
-    'HBSA3':7,
-    'IFCM3':5,
-    'JALL3':10,
-    'KEPL3':12,
-    'MYPK3':5,
-    'PRIO3':12,
-    'SIMH3':8,
-    'TASA4':8,
-    'TUPY3':11,
-    'WIZC3':5,
-}
+lista_acoes_em_caixa = [ 'ARZZ3', 'ASAI3', 'BBSE3', 'CPFE3', 'EGIE3', 'EZTC3', 'HYPE3', 'KEPL3', 'LEVE3', 'PRIO3', 'PSSA3', 'SBSP3', 'VIVT3', 'SLCE3', 'VALE3',]
 
-
-dividendos = {
-    'TAEE11':9,
-   ' VIVT3':12,
-    'BBSE3':17,
-    'ABCB4':16,
-   ' VBBR3':15,
-   ' CPLE6':16,
-   ' TRPL4':5
-    }
-fii = {
-    'BTLG11':22.30,
-    'Caixa':6,
-    'HGLG11':22.30,
-    'KNCA11':7.25,
-   ' MALL11':7.75,
-   ' PLCR11':13.57,
-    'RURA11':7.26,
-    'TRXF11':13.57
-}
-
-small_caps_dataframe = pd.DataFrame(list(small_caps.items()),columns=['Ativo','Proporção'])
-small_caps_dataframe['Proporção'] = small_caps_dataframe['Proporção']/100    
-    #---------------------- Small caps
-
-dividendos_dataframe = pd.DataFrame(list(dividendos.items()),columns=['Ativo','Proporção'])
-dividendos_dataframe['Proporção'] = dividendos_dataframe['Proporção']/100
-        #---------------------- Dividendos
-
-fii_dataframe = pd.DataFrame(list(fii.items()),columns=['Ativo','Proporção'])
-fii_dataframe['Proporção'] = fii_dataframe['Proporção']/100 
-    #---------------------- FII
-
-income_graf = pd.DataFrame(list(income.items()),columns=['Ativo','Proporção'])
-income_graf['Proporção'] = income_graf['Proporção']/100
-    
-    #---------------------- Moderada
-moderada = {ativo:0.70*income.get(ativo,0)+0.30*equities.get(ativo,0) for ativo in set(income)|set(equities)}
-moderada_grafico = pd.DataFrame(list(moderada.items()),columns=['Ativo','Proporção'])
-moderada_grafico['Proporção'] = moderada_grafico['Proporção']/100
-
-   
-    #-------------------- Arrojada     
-arrojada = {ativo:0.50*income.get(ativo,0)+0.50*equities.get(ativo,0) for ativo in set(income)|set(equities)}   
-arrojada_graf = pd.DataFrame(list(arrojada.items()),columns=['Ativo','Proporção'])
-arrojada_graf['Proporção'] = arrojada_graf['Proporção']/100
- 
-    #------------------ Conservadora
-   
-conservadora = {ativo:0.85*income.get(ativo,0)+0.15*equities.get(ativo,0) for ativo in set(income)|set(equities)}   
-conservadora_graf = pd.DataFrame(list(conservadora.items()),columns=['Ativo','Proporção'])
-conservadora_graf['Proporção'] = conservadora_graf['Proporção']/100
 
 
 if selecionar == 'Carteiras':
+    from carteiras_indiv import Basket_enquadramento_carteiras
 
+    if __name__=='__main__':
+        dia_e_hora = datetime.datetime.now()
+        inciando_programa = Basket_enquadramento_carteiras()
+        carteira_equity = inciando_programa.criando_carteiras('Carteira_equity',equities)
+        carteira_income = inciando_programa.criando_carteiras('Carteira Income',income)
+        carteira_small = inciando_programa.criando_carteiras('Carteira Small',small_caps)
+        carteira_dividendos = inciando_programa.criando_carteiras('Carteira Dividendos',dividendos)
+        carteira_fii = inciando_programa.criando_carteiras('Carteira FII', fii)
+        carteira_conservadora = inciando_programa.criando_carteiras_hibridas('Carteira Conservadora',0.85,0.15)
+        carteira_moderada = inciando_programa.criando_carteiras_hibridas('Carteira Moderada',0.70,0.30)
+        carteira_arrojada = inciando_programa.criando_carteiras_hibridas('Carteira Arrojada',0.50,0.50)
 
-    #--------------------------------
-    # --------Manipulação de arquivos
-    arquivo1 = arquivo1.rename(columns={'CONTA':'Conta','PRODUTO':'Produto','ATIVO':'Ativo','VALOR BRUTO':'Valor Bruto','QUANTIDADE':'Quantidade'})
+        dados_finais = inciando_programa.juntando_arqeuivos(controle=controle_psicao,posicao=posicao_btg1)
+        trantrando_dados_controle = inciando_programa.tratamento_de_dados_controle(controle_psicao)
 
-    arquivo2 = arquivo1.groupby(['Conta','Produto','Ativo'])[['Valor Bruto','Quantidade']].sum().reset_index('Conta')
-
-    # Sidebar
-
-    input_text = st.sidebar.text_input('Escreva o número conta')
-
-    #---------------
-    
-    #novo_arq = arquivo2.loc[arquivo2['CONTA']  == input_text]
-    cont_df = controle.loc[controle['Unnamed: 2'] == input_text]
-    filtrando_dados_por_conta = arquivo1.groupby(['Conta','Produto'])[['Valor Bruto','Quantidade']].sum().reset_index('Conta')
-    filtrando_dados_por_conta2 = filtrando_dados_por_conta.loc[filtrando_dados_por_conta['Conta']==input_text]
-    novo_arq = filtrando_dados_por_conta2.copy()
-
-    #----------------
-
-    novo_arq = novo_arq.groupby(['Produto','Conta'])[['Valor Bruto','Quantidade']].sum().reset_index()
-    controle = controle.iloc[:,[1,2,3,4,5,7,8,9,12,16,17,18]]
-    
-    
-
-    #------------- Manipulando arquivos para unir planilhas
-
-    controle['Unnamed: 2'] = controle['Unnamed: 2'].astype(str)
-    controle['Unnamed: 2'] = list(map(lambda x: '00' + x,controle['Unnamed: 2']))
-    try:
-            
-        novo_controle = pd.merge(controle,novo_arq, left_on='Unnamed: 2',right_on='Conta', how= 'outer' )
-        nov_controle = controle.loc[controle['Unnamed: 2'] == input_text ]
+        input_conta = st.sidebar.text_input('Escreva o número da conta : ')
         
-        #--------------- somando PL da carteira
+        dados_finais = dados_finais.loc[dados_finais['Conta']==input_conta].iloc[:,[8,9,10]]
 
+        patrimono_liquido_da_conta = dados_finais["Valor Líquido"].sum()
+        trantrando_dados_controle = trantrando_dados_controle.loc[trantrando_dados_controle['Conta']==input_conta]
 
-        qtd_ativos = novo_arq.groupby('Conta')['Quantidade'].sum().reset_index()
-        pl_por_produtos = novo_arq.groupby('Conta')['Valor Bruto'].sum().reset_index()
-
-
-        valor_liquido = pl_por_produtos.loc[0,'Valor Bruto']
-
-
-        novo_arq['Basket'] = novo_arq['Quantidade']/novo_arq['Valor Bruto']
+        carteira_modelo = inciando_programa.selecionando_modelo_de_carteira(trantrando_dados_controle,
+                                                                            carteira_arrojada,carteira_conservadora,carteira_moderada,
+                                                                            carteira_income,carteira_equity,carteira_small,carteira_dividendos)
         
+        carteira_modelo['Valor R$'] = carteira_modelo['Proporção']*patrimono_liquido_da_conta
+        carteira_modelo['Proporção'] = carteira_modelo['Proporção'].map(lambda x: f"{x * 100:,.2f}  %")
 
+        try:
+            basket_ = inciando_programa.criacao_basket(carteira_modelo=carteira_modelo,dados_finais=dados_finais,input_conta=input_conta)
+        except:
+            pass
 
-
-        #------------------ Selecionando qual tipo de carteira
-
-        if 'Unnamed: 12' in nov_controle.columns:
-            valor_coluna = nov_controle['Unnamed: 12'].iloc[0]
-        if valor_coluna == 'CON':
-            moderada_graf = conservadora_graf
-        elif valor_coluna == 'ARR':
-            moderada_graf = arrojada_graf
-        elif valor_coluna =='MOD':
-            moderada_graf = moderada_grafico
-        elif valor_coluna == 'INC':
-            moderada_graf = income_graf
-        elif valor_coluna == 'EQT':
-            moderada_graf = equities_graf 
-        elif valor_coluna == 'SMLL':
-            moderada_graf = small_caps_dataframe                  
-        elif valor_coluna == 'FII':
-            moderada_graf = fii_dataframe   
-        elif valor_coluna == 'DIV':
-            moderada_graf = dividendos_dataframe   
-        else:
-            st.success('Essa carteira e exeção')
-
-        
-        st.text('Valor total da carteira')
-        st.title(f'{valor_liquido:,.2f}')
-        
-
-        moderada_graf['Valor Distribuido'] = moderada_graf['Proporção']*valor_liquido
-
-
-
-
-
-        #-----------------acertando valores em ordem e retirando colunas
-        lista_acoes_sem_caixa = ['ARZZ3',
-            'ASAI3',
-            'CSAN3',
-            'CSED3',
-            'EGIE3',
-            'EQTL3',
-            'EZTC3',
-            'HYPE3',
-            'KEPL3',
-            'MULT3',
-            'PRIO3',
-            'PSSA3',
-            'SBSP3',
-            'SLCE3',
-            'VALE3']
-
-        distribuicao_alvo = moderada_graf[['Ativo','Valor Distribuido']].reset_index()
-        distribuicao_alvo['Ativo']=distribuicao_alvo['Ativo'].str.upper()
-        distribuicao_alvo = distribuicao_alvo.sort_values(by='Ativo')
-        distribuicao_alvo = distribuicao_alvo.drop(columns='index')
-
-        novo_arq = novo_arq.sort_values(by='Produto')
-        novo_arq = novo_arq.drop(columns='Conta')
-        arquivo_basket = pd.merge(distribuicao_alvo,novo_arq, left_on='Ativo',right_on='Produto',how='outer')
-        arquivo_basket['Quantidade Ideal'] = arquivo_basket['Basket']*arquivo_basket['Valor Distribuido']
-        arquivo_basket = arquivo_basket[['Ativo', 'Valor Distribuido','Quantidade Ideal']]
-
-        precos_de_mercado = {}
-        for ativo in lista_acoes_sem_caixa:
-            ticker = yf.Ticker(ativo +'.SA')
-            preco_atual = ticker.history(period='2m')['Close'].iloc[-1]
-        
-            precos_de_mercado[ativo] = preco_atual
-
-        arquivo_basket['Preco_de_mercado'] = ''
-        arquivo_basket['Preco_de_mercado'] = arquivo_basket['Ativo'].map(precos_de_mercado)
-        arquivo_basket['Quantidade Ideal' ]= arquivo_basket['Valor Distribuido']/arquivo_basket['Preco_de_mercado'] 
-
-
-
-        #-------------------filtrando RV x RF
-
-        lista_acoes = ['ARZZ3','ARZZ',
-            'ASAI3',
-            'CSAN3',
-            'CSED3',
-            'EGIE3',
-            'EQTL3',
-            'EZTC3',
-            'HYPE3',
-            'KEPL3',
-            'MULT3',
-            'PRIO3',
-            'PSSA3',
-            'SBSP3',
-            'SLCE3',
-            'VALE3',
-            'Caixa']
-
-        filtro_rv = novo_arq[novo_arq['Produto'].isin(lista_acoes)].reset_index()
-        filtro_rf = novo_arq[~novo_arq['Produto'].isin(lista_acoes)].reset_index()
-
-        filtro_rv_BASE = moderada_graf[moderada_graf['Ativo'].isin(lista_acoes)].reset_index()
-        
-        filtro_rf_BASE = moderada_graf[~moderada_graf['Ativo'].isin(lista_acoes)].reset_index()
-
-        base_df_rf = arquivo_basket[arquivo_basket['Ativo'].isin(lista_acoes)].reset_index()
-        base_df_rv = arquivo_basket[~arquivo_basket['Ativo'].isin(lista_acoes)].reset_index()
-
-        filtro_total_rvrf = novo_arq[novo_arq['Produto'].isin(lista_acoes)].sum().reset_index()
-        analise_rvrf = novo_arq[~novo_arq['Produto'].isin(lista_acoes)].sum().reset_index()
-
-
-        st.markdown("<br>",unsafe_allow_html=True)
-        st.markdown("<br>",unsafe_allow_html=True)
-        mostrar_rv = st.toggle('Mostrar apenas renda variavel')
-        mostrar_rf = st.toggle('Mostrar apenas renda fixa')
-        st.markdown("<br>",unsafe_allow_html=True)
-
-
-        
-        if mostrar_rv and mostrar_rf:
-            novo_arq = novo_arq
-            moderada_graf = moderada_graf
-            arquivo_basket = arquivo_basket
-
-        elif mostrar_rv:
-            novo_arq = filtro_rv
-            moderada_graf =filtro_rv_BASE
-            arquivo_basket = base_df_rf
-
-        elif mostrar_rf:
-            novo_arq = filtro_rf
-            moderada_graf = filtro_rf_BASE
-            arquivo_basket = base_df_rv
-        else:
-            novo_arq = novo_arq
-            moderada_graf = moderada_graf
-            arquivo_basket = arquivo_basket            
-
-
-        #---------------------------
-        #        Graficos
-
-        
-
-        graf1 = go.Figure(data=[go.Pie(labels=novo_arq['Produto'],
-                                        values=novo_arq['Valor Bruto'],
-                                        hole=0.4,
-                                        textinfo='label+percent',
-                                        insidetextorientation='radial',
-                                        textposition='outside'
-                                        )])
-
-
-        figas=px.pie(moderada_graf,values='Proporção',labels='Ativo')
-
-        graf_moderada = go.Figure(data=[go.Pie(labels=moderada_graf['Ativo'], values=moderada_graf['Proporção'],
-                                                            hole=0.4,
-                                        textinfo='label+percent',
-                                        insidetextorientation='radial',
-                                        textposition='outside'
-                                        )])
-        graf1.update_layout(title='Posição atual da carteira')
-        graf_moderada.update_layout(title = 'Carteira balanceada')
-
-
-
-        nov_controle = nov_controle.rename(columns={
-            'Unnamed: 1':'Nome do cliente',
-            'Unnamed: 2':'Conta',
-                'Unnamed: 3':'Escritorio',
-                'Unnamed: 4':'Estado',
-                    'Unnamed: 5':'Assessor',
-        'Backoffice/ Mesa':'Status',
-            'Mesa de Operação.1':'Situação',
-            'Backoffice.1':'Exeção',
-            'Unnamed: 12':'Perfil',
-        'Mesa de Operação.2':'Lembretes mesa',
-            'Gestão/ Head comercial':'Observações',
-            'Backoffice ':'Observações'
-        })
-        nov_controle = nov_controle.unstack()
-        
-        # -------------- Criando arquivo para Basket
-        
-        basket = pd.merge(arquivo_basket,novo_arq,left_on='Ativo',right_on='Produto',how='inner').reset_index()
-        
-        precos_mercado = {}
-
-        basket['Basket_BTG'] = basket['Quantidade Ideal']-basket['Quantidade']
-        basket = basket[[
-            'Ativo',  'Basket_BTG']]
-        basket['C/V'] = np.where(basket['Basket_BTG']<0,'V','C')
-        basket['Basket_BTG'] = basket['Basket_BTG'].fillna(0)
-        basket['Basket_BTG'] = np.where(basket['Basket_BTG']<0,basket['Basket_BTG'].astype(int).astype(str).str[1:],basket['Basket_BTG'])
-        basket['Conta'] = input_text
-        basket['Validade'] = 'DIA'
-        basket['Basket_BTG'] = pd.to_numeric(basket['Basket_BTG'],errors='coerce')
-        basket['Basket_BTG'] =basket['Basket_BTG'].astype(float).fillna(0).astype(int)
-        
-        for ativo in basket['Ativo']:
-            ticker = yf.Ticker(ativo +'.SA')
-            preco_atual = ticker.history(period='5m')['Close'].iloc[-1]
-
-            precos_mercado[ativo] = preco_atual
-        basket['Preço'] = ''
-        basket['Preço'] = basket['Ativo'].map(precos_mercado)
-
-        basket= basket.rename(columns={
-            'Basket_BTG':'Quantidade',
-        })
-        basket = basket [['Ativo','C/V','Quantidade','Preço','Conta','Validade']]
-
-        data_e_hora = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M')
-        nome_arquivo = f'{data_e_hora}_{input_text}.xlsx'
-
-        if basket is not None:
-            
-            
-            # Use io.BytesIO para criar um buffer de bytes
+        st.text(f'Patrimônio Líquido da carteira :   {dados_finais["Valor Líquido"].sum():,.2f}')
+                
+        try:        
             output4 = io.BytesIO()
-            # Salve o DataFrame no buffer no formato XLSX
-            with pd.ExcelWriter(output4, engine='xlsxwriter') as writer:
-                basket.to_excel(writer,
-                                            sheet_name='Basket',
-                                                index=False)
-            
-            # Crie um link para download
+            with pd.ExcelWriter(output4, engine='xlsxwriter') as writer:basket_.to_excel(writer,sheet_name=f'Basket__{input_conta}___',index=False)
             output4.seek(0)
-            st.download_button(type='primary',
-                label="Basket Download",
-                data=output4,
-                file_name=nome_arquivo,
-                key='download_button')
+            st.download_button(type='primary',label="Basket Download",data=output4,file_name=f'basket_{input_conta}__{dia_e_hora}.xlsx',key='download_button')
+        except:
+            pass    
         
+        col1,col2 = st.columns(2)
+        with col1:
+            if st.toggle('Enquadramento da carteira'):
+                        grafico_estrategia = inciando_programa.checando_estrategia(dados_finais)
+            else:                    
+                posicao_atual_grafico = inciando_programa.criando_graficos_posicao_atual(dados_finais)
+            st.dataframe(dados_finais.sort_values(by='Produto'),use_container_width=True)
+            st.dataframe(trantrando_dados_controle.unstack(),use_container_width=True)
+            basket_compra = basket_[basket_['C/V']=='C']
+            basket_compra['Valor'] = basket_compra['Quantidade']*basket_compra['Preço']
+            basket_venda = basket_[basket_['C/V']=='V']
+            basket_venda['Valor'] = basket_venda['Quantidade']*basket_venda['Preço']
+            st.warning(f' O saldo Nescessario para Compra : {basket_compra["Valor"].sum():,.2f}')
+            st.warning(f' O saldo Nescessario para Venda : {basket_venda["Valor"].sum():,.2f}')
+            st.dataframe(basket_)
 
-        #---------------------------------------------------
-        #---------------------- Ajustando graficos e tabelas
-        
-        novo_arq = novo_arq[['Produto', 'Valor Bruto', 'Quantidade']]
-        novo_arq.rename(columns={
-            'Produto':'Ativo',
-            'Valor Bruto':'Valor em R$',
-            'Quantidade':'Quantidade do ativo'
-        },inplace=True)
-        arquivo_basket.rename(columns={
-            'Valor Distribuido':'Valor em R$',
-            'Quantidade Ideal':'Quantidade do ativo',
-            'Preco_de_mercado':'Cotação atual'
-        },inplace=True)
-        print(arquivo_basket.info())
-        arquivo_basket['Quantidade do ativo'] = arquivo_basket['Quantidade do ativo'].fillna(0)
-        arquivo_basket['Quantidade do ativo'] = arquivo_basket['Quantidade do ativo'].round(0).astype(int)
-
-
-        somatario_basket = basket.copy()
-        compra = somatario_basket[somatario_basket['C/V']=='C']
-        compra['valor'] = compra['Quantidade']*compra['Preço']
-
-        
-
-        venda = somatario_basket[somatario_basket['C/V']=='V']
-        venda['valor'] = venda['Quantidade']*venda['Preço']
-
-        #----------------------------------------------
-        #---------------------- Streamlit visualization
-
-
-
-        col1, col2 = st.columns(2)
-
-        # -------------Coluna 1
-
-        with col1: 
-            st.subheader('Proporção da carteira')
-            st.plotly_chart(graf1,use_container_width= True)
-            st.dataframe(novo_arq,use_container_width=True)
-            with col1: ''
-            with col1: ''
-            st.subheader('Informações do cliente')
-            st.dataframe(nov_controle,use_container_width=True)
-            with col1:''
-            st.subheader('Basket')
-            try:
-                st.warning(f' O saldo gerado pelas vendas  : {venda["valor"].sum():,.2f}')
-            except:
-                pass
-            try:
-                st.warning(f' O saldo Nescessario para compra : {compra["valor"].sum():,.2f}')          
-            except:
-                pass
-            st.dataframe(basket,use_container_width=True)
-
-            # --------------Coluna 2
-
-        with col2: st.subheader('Proporção ideal')
-        with col2: st.plotly_chart(graf_moderada,use_container_width=True)
-        with col2: st.dataframe(arquivo_basket,use_container_width=True)
-
-
-        #3 --------------- ROW
-
-    except:
-        st.header('Digite uma conta valida')
+        with col2:
+            grafico_posicao_ideal = inciando_programa.criando_graficos_posicao_ideal(carteira_modelo)
+            st.dataframe(carteira_modelo.sort_values(by='Ativo'),use_container_width=True)
+            grafico_rentabilidade = inciando_programa.grafico_rentabilidade(rentabilidade,input_conta)
 
 
 

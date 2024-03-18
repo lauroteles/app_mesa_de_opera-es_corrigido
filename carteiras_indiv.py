@@ -62,26 +62,41 @@ class Basket_enquadramento_carteiras():
         arquivo_final = pd.merge(planilha_controle,posicao,on='Conta',how='outer')
         return arquivo_final
     
-    def selecionando_modelo_de_carteira(self,arquivo_final, carteira_arrojada, carteira_conservadora, carteira_moderada, carteira_income, carteira_equity, carteira_small, carteira_dividendos):
+    def selecionando_modelo_de_carteira(self,arquivo_final, carteira_arrojada, carteira_conservadora, 
+                                        carteira_moderada, carteira_income, carteira_equity,
+                                          carteira_small, carteira_dividendos):
+        carteira_coluna = arquivo_final['Carteira'].iloc[0]
 
-        if 'Carteira' in arquivo_final.columns:
-            carteira_coluna = arquivo_final['Carteira'].iloc[0]
-        if carteira_coluna =='CON':
-            carteira_utilizada = carteira_conservadora
-        if carteira_coluna == 'ARR':
-            carteira_utilizada = carteira_arrojada
-        if carteira_coluna =='MOD':
-            carteira_utilizada = carteira_moderada
-        if carteira_coluna =='INC':
-            carteira_utilizada = carteira_income
-        if carteira_coluna =='EQT':
-            carteira_utilizada=carteira_equity
-        if carteira_coluna=='SMLL':
-            carteira_utilizada=carteira_small
-        if carteira_coluna=='DIV':
-            carteira_utilizada=carteira_dividendos
-        else:
-            print('')                         
+        carteiras = {
+            'CON':carteira_conservadora,
+            'ARR':carteira_arrojada,
+            'MOD':carteira_moderada,
+            'INC':carteira_income,
+            'EQT':carteira_equity,
+            'SMLL':carteira_small,
+            'DIV':carteira_dividendos
+        }
+        carteira_utilizada = carteiras.get(carteira_coluna,None)
+        if carteira_utilizada is None:
+            print('A carteira nao foi reconhecida')
+        # if 'Carteira' in arquivo_final.columns:
+        #     carteira_coluna = arquivo_final['Carteira'].iloc[0]
+        # if carteira_coluna =='CON':
+        #     carteira_utilizada = carteira_conservadora
+        # if carteira_coluna == 'ARR':
+        #     carteira_utilizada = carteira_arrojada
+        # if carteira_coluna =='MOD':
+        #     carteira_utilizada = carteira_moderada
+        # if carteira_coluna =='INC':
+        #     carteira_utilizada = carteira_income
+        # if carteira_coluna =='EQT':
+        #     carteira_utilizada=carteira_equity
+        # if carteira_coluna=='SMLL':
+        #     carteira_utilizada=carteira_small
+        # if carteira_coluna=='DIV':
+        #     carteira_utilizada=carteira_dividendos
+        # else:
+        #     print('')                         
         return carteira_utilizada
     
     def criando_graficos_posicao_atual(self,dados_finais):
@@ -119,7 +134,8 @@ class Basket_enquadramento_carteiras():
             
                 precos_de_mercado.append([ativo,preco_atual])
 
-        cotacoes_momento = pd.DataFrame(precos_de_mercado,columns =['Ativo','Cotação atual'])     
+        cotacoes_momento = pd.DataFrame(precos_de_mercado,columns =['Ativo','Cotação atual']) 
+            
         self.basket = basket.merge(cotacoes_momento,on='Ativo',how='outer').fillna(0)
         self.basket['Valor_compra_venda'] = round(self.basket['Valor R$']-self.basket['Valor Líquido'],2)
         self.basket['Quantidade'] = round(self.basket['Valor_compra_venda']/self.basket['Cotação atual'],0).abs()
@@ -144,9 +160,9 @@ class Basket_enquadramento_carteiras():
     def grafico_rentabilidade(self,rentabilidade,input_conta):
         rentabilidade = rentabilidade.iloc[:,[0,2,4,6,8,10,12,14,16,18,20,22,24]]
         rentabilidade = rentabilidade[rentabilidade['Periodo']==input_conta]
-        
-        rentabilidade = rentabilidade.transpose().reset_index().rename(columns={'index':'Periodo',146:'Rentabilidade'}).drop(0)
-        rentabilidade['Rentabilidade acumulada'] = ((1 + rentabilidade['Rentabilidade']/100).cumprod(axis=0)-1)*10000
+        coluna_rentabilidade = rentabilidade.columns[-1]
+        rentabilidade = rentabilidade.transpose().reset_index().rename(columns={'index':'Periodo'}).drop(0)
+        rentabilidade['Rentabilidade acumulada'] = ((1 + rentabilidade.iloc[:,-1]/100).cumprod(axis=0)-1)*10000
 
         grafico_retabilidade = px.line(y=rentabilidade['Rentabilidade acumulada'],x=rentabilidade['Periodo'],title='Rentabilidade')
         return  st.plotly_chart(grafico_retabilidade)

@@ -88,71 +88,71 @@ if selecionar == 'Carteiras':
     if __name__=='__main__':
         dia_e_hora = datetime.datetime.now()
         inciando_programa = Basket_enquadramento_carteiras()
-        #try:
-        carteira_equity = inciando_programa.criando_carteiras('Carteira_equity',equities)
-        carteira_income = inciando_programa.criando_carteiras('Carteira Income',income)
-        carteira_small = inciando_programa.criando_carteiras('Carteira Small',small_caps)
-        carteira_dividendos = inciando_programa.criando_carteiras('Carteira Dividendos',dividendos)
-        carteira_fii = inciando_programa.criando_carteiras('Carteira FII', fii)
-        carteira_conservadora = inciando_programa.criando_carteiras_hibridas('Carteira Conservadora',0.15,0.85)
-        carteira_moderada = inciando_programa.criando_carteiras_hibridas('Carteira Moderada',0.30,0.70)
-        carteira_arrojada = inciando_programa.criando_carteiras_hibridas('Carteira Arrojada',0.50,0.50)
-
-        dados_finais = inciando_programa.juntando_arqeuivos(controle=controle_psicao,posicao=posicao_btg1)
-        trantrando_dados_controle = inciando_programa.tratamento_de_dados_controle(controle_psicao)
-
-        input_conta = st.sidebar.text_input('Escreva o número da conta : ')
-        
-        dados_finais = dados_finais.loc[dados_finais['Conta']==input_conta].iloc[:,[8,9,10]]
-
-        patrimono_liquido_da_conta = dados_finais["Valor Líquido"].sum()
-        trantrando_dados_controle = trantrando_dados_controle.loc[trantrando_dados_controle['Conta']==input_conta]
-
-        carteira_modelo = inciando_programa.selecionando_modelo_de_carteira(trantrando_dados_controle,
-                                                                            carteira_arrojada,carteira_conservadora,carteira_moderada,
-                                                                            carteira_income,carteira_equity,carteira_small,carteira_dividendos,carteira_fii)
-    
-        carteira_modelo['Valor R$'] = carteira_modelo['Proporção']*patrimono_liquido_da_conta
-        carteira_modelo['Proporção'] = carteira_modelo['Proporção'].map(lambda x: f"{x * 100:,.2f}  %")
-
         try:
-            basket_ = inciando_programa.criacao_basket(carteira_modelo=carteira_modelo,dados_finais=dados_finais,input_conta=input_conta)
-        except:
-            pass
+            carteira_equity = inciando_programa.criando_carteiras('Carteira_equity',equities)
+            carteira_income = inciando_programa.criando_carteiras('Carteira Income',income)
+            carteira_small = inciando_programa.criando_carteiras('Carteira Small',small_caps)
+            carteira_dividendos = inciando_programa.criando_carteiras('Carteira Dividendos',dividendos)
+            carteira_fii = inciando_programa.criando_carteiras('Carteira FII', fii)
+            carteira_conservadora = inciando_programa.criando_carteiras_hibridas('Carteira Conservadora',0.15,0.85)
+            carteira_moderada = inciando_programa.criando_carteiras_hibridas('Carteira Moderada',0.30,0.70)
+            carteira_arrojada = inciando_programa.criando_carteiras_hibridas('Carteira Arrojada',0.50,0.50)
 
-        st.text(f'Patrimônio Líquido da carteira :   {dados_finais["Valor Líquido"].sum():,.2f}')
-                
-        try:        
-            output4 = io.BytesIO()
-            with pd.ExcelWriter(output4, engine='xlsxwriter') as writer:basket_.to_excel(writer,sheet_name=f'Basket__{input_conta}___',index=False)
-            output4.seek(0)
-            st.download_button(type='primary',label="Basket Download",data=output4,file_name=f'basket_{input_conta}__{dia_e_hora}.xlsx',key='download_button')
-        except:
-            pass    
+            dados_finais = inciando_programa.juntando_arqeuivos(controle=controle_psicao,posicao=posicao_btg1)
+            trantrando_dados_controle = inciando_programa.tratamento_de_dados_controle(controle_psicao)
+
+            input_conta = st.sidebar.text_input('Escreva o número da conta : ')
+            
+            dados_finais = dados_finais.loc[dados_finais['Conta']==input_conta].iloc[:,[8,9,10]]
+
+            patrimono_liquido_da_conta = dados_finais["Valor Líquido"].sum()
+            trantrando_dados_controle = trantrando_dados_controle.loc[trantrando_dados_controle['Conta']==input_conta]
+
+            carteira_modelo = inciando_programa.selecionando_modelo_de_carteira(trantrando_dados_controle,
+                                                                                carteira_arrojada,carteira_conservadora,carteira_moderada,
+                                                                                carteira_income,carteira_equity,carteira_small,carteira_dividendos,carteira_fii)
         
-        col1,col2 = st.columns(2)
-        with col1:
-            if st.toggle('Enquadramento da carteira'):
-                        grafico_estrategia = inciando_programa.checando_estrategia(dados_finais)
-            else:                    
-                posicao_atual_grafico = inciando_programa.criando_graficos_posicao_atual(dados_finais)
+            carteira_modelo['Valor R$'] = carteira_modelo['Proporção']*patrimono_liquido_da_conta
+            carteira_modelo['Proporção'] = carteira_modelo['Proporção'].map(lambda x: f"{x * 100:,.2f}  %")
 
-            st.dataframe(dados_finais.sort_values(by='Produto'),use_container_width=True)
-            st.dataframe(trantrando_dados_controle.unstack(),use_container_width=True)
-            basket_compra = basket_[basket_['C/V']=='C']
-            basket_compra['Valor'] = basket_compra['Quantidade']*basket_compra['Preço']
-            basket_venda = basket_[basket_['C/V']=='V']
-            basket_venda['Valor'] = basket_venda['Quantidade']*basket_venda['Preço']
-            st.warning(f' O saldo Nescessario para Compra : {basket_compra["Valor"].sum():,.2f}')
-            st.warning(f' O saldo Nescessario para Venda : {basket_venda["Valor"].sum():,.2f}')
-            st.dataframe(basket_)
+            try:
+                basket_ = inciando_programa.criacao_basket(carteira_modelo=carteira_modelo,dados_finais=dados_finais,input_conta=input_conta)
+            except:
+                pass
 
-        with col2:
-            grafico_posicao_ideal = inciando_programa.criando_graficos_posicao_ideal(carteira_modelo=carteira_modelo)
-            st.dataframe(carteira_modelo.sort_values(by='Ativo'),use_container_width=True)
+            st.text(f'Patrimônio Líquido da carteira :   {dados_finais["Valor Líquido"].sum():,.2f}')
+                    
+            try:        
+                output4 = io.BytesIO()
+                with pd.ExcelWriter(output4, engine='xlsxwriter') as writer:basket_.to_excel(writer,sheet_name=f'Basket__{input_conta}___',index=False)
+                output4.seek(0)
+                st.download_button(type='primary',label="Basket Download",data=output4,file_name=f'basket_{input_conta}__{dia_e_hora}.xlsx',key='download_button')
+            except:
+                pass    
+            
+            col1,col2 = st.columns(2)
+            with col1:
+                if st.toggle('Enquadramento da carteira'):
+                            grafico_estrategia = inciando_programa.checando_estrategia(dados_finais)
+                else:                    
+                    posicao_atual_grafico = inciando_programa.criando_graficos_posicao_atual(dados_finais)
 
-            grafico_rentabilidade = inciando_programa.grafico_rentabilidade(rentabilidade,input_conta)
-        #except:
+                st.dataframe(dados_finais.sort_values(by='Produto'),use_container_width=True)
+                st.dataframe(trantrando_dados_controle.unstack(),use_container_width=True)
+                basket_compra = basket_[basket_['C/V']=='C']
+                basket_compra['Valor'] = basket_compra['Quantidade']*basket_compra['Preço']
+                basket_venda = basket_[basket_['C/V']=='V']
+                basket_venda['Valor'] = basket_venda['Quantidade']*basket_venda['Preço']
+                st.warning(f' O saldo Nescessario para Compra : {basket_compra["Valor"].sum():,.2f}')
+                st.warning(f' O saldo Nescessario para Venda : {basket_venda["Valor"].sum():,.2f}')
+                st.dataframe(basket_)
+
+            with col2:
+                grafico_posicao_ideal = inciando_programa.criando_graficos_posicao_ideal(carteira_modelo=carteira_modelo)
+                st.dataframe(carteira_modelo.sort_values(by='Ativo'),use_container_width=True)
+
+                grafico_rentabilidade = inciando_programa.grafico_rentabilidade(rentabilidade,input_conta)
+        except:
             st.write('Conta nâo encontrada')
 
 

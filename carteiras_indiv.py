@@ -64,7 +64,7 @@ class Basket_enquadramento_carteiras():
     
     def selecionando_modelo_de_carteira(self,arquivo_final, carteira_arrojada, carteira_conservadora, 
                                         carteira_moderada, carteira_income, carteira_equity,
-                                          carteira_small, carteira_dividendos):
+                                          carteira_small, carteira_dividendos,carteira_fii):
         carteira_coluna = arquivo_final['Carteira'].iloc[0]
 
         carteiras = {
@@ -74,7 +74,8 @@ class Basket_enquadramento_carteiras():
             'INC':carteira_income,
             'EQT':carteira_equity,
             'SMLL':carteira_small,
-            'DIV':carteira_dividendos
+            'DIV':carteira_dividendos,
+            'FII':carteira_fii
         }
         carteira_utilizada = carteiras.get(carteira_coluna,None)
         if carteira_utilizada is None:

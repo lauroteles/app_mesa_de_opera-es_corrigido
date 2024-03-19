@@ -78,25 +78,7 @@ class Basket_enquadramento_carteiras():
         }
         carteira_utilizada = carteiras.get(carteira_coluna,None)
         if carteira_utilizada is None:
-            print('A carteira nao foi reconhecida')
-        # if 'Carteira' in arquivo_final.columns:
-        #     carteira_coluna = arquivo_final['Carteira'].iloc[0]
-        # if carteira_coluna =='CON':
-        #     carteira_utilizada = carteira_conservadora
-        # if carteira_coluna == 'ARR':
-        #     carteira_utilizada = carteira_arrojada
-        # if carteira_coluna =='MOD':
-        #     carteira_utilizada = carteira_moderada
-        # if carteira_coluna =='INC':
-        #     carteira_utilizada = carteira_income
-        # if carteira_coluna =='EQT':
-        #     carteira_utilizada=carteira_equity
-        # if carteira_coluna=='SMLL':
-        #     carteira_utilizada=carteira_small
-        # if carteira_coluna=='DIV':
-        #     carteira_utilizada=carteira_dividendos
-        # else:
-        #     print('')                         
+            print('A carteira nao foi reconhecida')                      
         return carteira_utilizada
     
     def criando_graficos_posicao_atual(self,dados_finais):

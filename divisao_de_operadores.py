@@ -51,7 +51,7 @@ class Divisao_de_contas():
         
 
     def contas_nao_encontradas(self,arquivo_compilado):
-        contas_co_admin = ['005190138','004724018','004641487','004643737','004855570','004855596','004643746','005320069','004884046',]
+        contas_co_admin = ['005190138','004724018','004641487','004643737','004855570','004855596','004643746','005320069','004884046','005053939']
         self.contas_nao_encontrados = arquivo_compilado[(arquivo_compilado['Operador'].isnull())&(arquivo_compilado['Saldo']>1000)|(arquivo_compilado['Saldo']<0)]
         self.contas_nao_encontrados = self.contas_nao_encontrados[~self.contas_nao_encontrados['Conta'].isin(contas_co_admin)]
         return self.contas_nao_encontrados

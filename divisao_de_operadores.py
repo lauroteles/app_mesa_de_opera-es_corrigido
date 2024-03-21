@@ -38,6 +38,8 @@ class Divisao_de_contas():
         self.filtrando_saldo.loc[(self.filtrando_saldo['Valor'] > 400000) & (self.filtrando_saldo['Valor'] < 700000), 'Operador'] = 'Breno'
         self.filtrando_saldo.loc[self.filtrando_saldo['Valor']<400000, 'Operador'] = 'Augusto'
         colunas_ajustar_decimal = ['Saldo','Valor']
+        contas_co_admin = ['005338054','004313254','005190138','004724018','004641487','004643737','004855570','004855596','004643746','005320069','004884046','005053939']
+        self.filtrando_saldo = self.filtrando_saldo[~self.filtrando_saldo['Conta'].isin(contas_co_admin)]
 
         for coluna in colunas_ajustar_decimal:
             self.filtrando_saldo[coluna] = self.filtrando_saldo[coluna].apply(lambda x: '{:,.2f}'.format(x))

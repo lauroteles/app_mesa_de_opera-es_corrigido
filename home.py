@@ -519,15 +519,17 @@ if selecionar == 'Divisão de operadores':
     filtrando_saldo = arquivo1.filtrando_dados_e_separando_operadores(arquivo_compilado=arquivo_compilado)
     
     col1,col2 = st.columns(2)
-
+    st.warning(filtrando_saldo['Operador'].value_counts())
     with col1:
         seletor_operador = st.selectbox('Operadores',options=filtrando_saldo['Operador'].unique())
         filtrando_saldo = filtrando_saldo.loc[filtrando_saldo['Operador']==seletor_operador]
+        
     
     cores = {'Inativo':'background-color: yellow',
             'Ativo':'background-color: green',
             'Pode Operar':'background-color: green',
-            'Checar conta':'background-color: red'}
+            'Checar conta':'background-color: red',
+            np.nan:'background-color: #B8860B'}
         
     
     st.dataframe(filtrando_saldo.style.applymap(lambda x: cores[x], subset=['Status']),use_container_width=True)

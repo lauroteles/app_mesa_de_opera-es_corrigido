@@ -34,13 +34,9 @@ class Divisao_de_contas():
 
         self.filtrando_saldo = self.arquivo_compilado.loc[(self.arquivo_compilado['Saldo']>1000)|(self.arquivo_compilado['Saldo']<0)].sort_values(by='Saldo',ascending=False)
 
-        self.filtrando_saldo.loc[(self.filtrando_saldo['Valor']>250000) & (self.filtrando_saldo['Operador'] == 'Bruno'),'Operador'] = 'Bruno'
-        self.filtrando_saldo.loc[(self.filtrando_saldo['Valor']<250000) & (self.filtrando_saldo['Operador'] == 'Bruno'),'Operador'] = 'Breno'
-        self.filtrando_saldo.loc[(self.filtrando_saldo['Valor']>200000) & (self.filtrando_saldo['Operador'] == 'Léo'),'Operador'] = 'Léo'
-        self.filtrando_saldo.loc[(self.filtrando_saldo['Valor']<200000) & (self.filtrando_saldo['Operador'] == 'Léo'),'Operador'] = 'Augusto'
-
-        self.filtrando_saldo.loc[(self.filtrando_saldo['Valor']>200000) & (self.filtrando_saldo['Operador'] == 'Augusto'),'Operador'] = 'Léo'
-        self.filtrando_saldo.loc[(self.filtrando_saldo['Valor']>250000) & (self.filtrando_saldo['Operador'] == 'Breno'),'Operador'] = 'Bruno'
+        self.filtrando_saldo.loc[self.filtrando_saldo['Valor']>700000, 'Operador'] = 'Bruno'
+        self.filtrando_saldo.loc[(self.filtrando_saldo['Valor'] > 400000) & (self.filtrando_saldo['Valor'] < 700000), 'Operador'] = 'Breno'
+        self.filtrando_saldo.loc[self.filtrando_saldo['Valor']<400000, 'Operador'] = 'Augusto'
         colunas_ajustar_decimal = ['Saldo','Valor']
 
         for coluna in colunas_ajustar_decimal:
@@ -56,4 +52,11 @@ class Divisao_de_contas():
         self.contas_nao_encontrados = self.contas_nao_encontrados[~self.contas_nao_encontrados['Conta'].isin(contas_co_admin)]
         return self.contas_nao_encontrados
 
+    def contando_oepradores(self,arquivo_compilado):
 
+        self.arquivo_compilado.loc[self.arquivo_compilado['Valor']>700000, 'Operador'] = 'Bruno'
+        self.arquivo_compilado.loc[(self.arquivo_compilado['Valor'] > 400000) & (self.arquivo_compilado['Valor'] < 700000), 'Operador'] = 'Breno'
+        self.arquivo_compilado.loc[self.arquivo_compilado['Valor']<400000, 'Operador'] = 'Augusto'
+
+        return self.arquivo_compilado
+        

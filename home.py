@@ -520,7 +520,7 @@ if selecionar == 'Divisão de operadores':
     contando_operadores = arquivo1.contando_oepradores(arquivo_compilado=arquivo_compilado)
 
     col1,col2 = st.columns(2)
-    st.text(f"{filtrando_saldo['Operador'].value_counts()}")
+    st.text(f"{filtrando_saldo['Operador'].value_counts().to_string()}")
     with col1:
         seletor_operador = st.selectbox('Operadores',options=filtrando_saldo['Operador'].unique())
         filtrando_saldo = filtrando_saldo.loc[filtrando_saldo['Operador']==seletor_operador] 
@@ -538,7 +538,7 @@ if selecionar == 'Divisão de operadores':
 
     contas_faltantes = arquivo1.contas_nao_encontradas(arquivo_compilado=arquivo_compilado)
 
-    st.text(f" Contagem Total de clientes por {contando_operadores['Operador'].value_counts()}")
+    st.text(f" Contagem Total de clientes por {contando_operadores['Operador'].value_counts().to_string()}")
     if contas_faltantes is not None:
         st.subheader('Checar Contas')
         st.dataframe(contas_faltantes)

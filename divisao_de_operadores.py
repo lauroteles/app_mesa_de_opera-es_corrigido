@@ -55,7 +55,7 @@ class Divisao_de_contas():
         return self.contas_nao_encontrados
 
     def contando_oepradores(self,arquivo_compilado):
-
+        self.arquivo_compilado = arquivo_compilado
         self.arquivo_compilado.loc[self.arquivo_compilado['Valor']>700000, 'Operador'] = 'Bruno'
         self.arquivo_compilado.loc[(self.arquivo_compilado['Valor'] > 400000) & (self.arquivo_compilado['Valor'] < 700000), 'Operador'] = 'Breno'
         self.arquivo_compilado.loc[self.arquivo_compilado['Valor']<400000, 'Operador'] = 'Augusto'

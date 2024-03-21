@@ -5,24 +5,22 @@ class Guide_Divisao_contas():
     def __init__(self):
         print('Hello World')
 
-    def trabalhando_dados(self):
+    def trabalhando_dados(self,controle_g,pl,saldo):
 
-        controle = pd.read_excel(r'C:\Users\lauro.telles\Desktop\Mesa_app_3\app_mesa_de_opera-es_corrigido\Controle de Contratos - Atualizado Fevereiro de 2024 (5).xlsx',3,skiprows=1)
+        self.controle = controle_g
+        self.pl = pl 
+        self.saldo = saldo
 
-        pl = pd.read_excel(r'C:\Users\lauro.telles\Desktop\Mesa_app_3\app_mesa_de_opera-es_corrigido\Bluemetrix20240318_ABS.xlsx')
+        self.controle = self.controle.iloc[:,[1,2,6,7,8,12,19,20,21,-1]]
+        self.pl = self.pl.iloc[:,[1,11]].rename(columns={'CLIE_ID':'Conta','SALDO_BRUTO':'PL'})
+        self.pl = self.pl.groupby('Conta')['PL'].sum().reset_index()
+        self.saldo = self.saldo.iloc[:,[2,5]].rename(columns={'Cod. Conta Local':'Conta','Saldo Previsto':'Saldo'})
+        self.pl['Conta'] = self.pl['Conta'].astype(str)
+        self.saldo['Conta'] = self.saldo['Conta'].astype(str)
+        self.controle['Conta'] = self.controle['Conta'].str[:-1]
 
-        saldo = pd.read_excel(r'C:\Users\lauro.telles\Desktop\Mesa_app_3\app_mesa_de_opera-es_corrigido\IClientBalance-20240321-110159-af1ee8.xlsx',)
-
-        controle = controle.iloc[:,[1,2,6,7,8,12,19,20,21,-1]]
-        pl = pl.iloc[:,[1,11]].rename(columns={'CLIE_ID':'Conta','SALDO_BRUTO':'PL'})
-        pl = pl.groupby('Conta')['PL'].sum().reset_index()
-        saldo = saldo.iloc[:,[2,5]].rename(columns={'Cod. Conta Local':'Conta','Saldo Previsto':'Saldo'})
-        pl['Conta'] = pl['Conta'].astype(str)
-        saldo['Conta'] = saldo['Conta'].astype(str)
-        controle['Conta'] = controle['Conta'].str[:-1]
-
-        self.arquivo_final = pd.merge(controle,pl, on='Conta',how='outer')
-        self.arquivo_final = self.arquivo_final.merge(saldo,on='Conta',how='outer')
+        self.arquivo_final = pd.merge(self.controle,self.pl, on='Conta',how='outer')
+        self.arquivo_final = self.arquivo_final.merge(self.saldo,on='Conta',how='outer')
 
         return self.arquivo_final
 
@@ -60,34 +58,7 @@ class Guide_Divisao_contas():
         
         return self.arquivo_compilado
                 
-# if __name__=='__main__':
 
-#     iniciando = Guide_Divisao_contas()
-#     arquivo_final = iniciando.trabalhando_dados()
-#     dividindo_operadores = iniciando.dividindo_contas(arquivo_final=arquivo_final)
-#     contas_nao_contradas = iniciando.contas_nao_encontradas(arquivo_compilado=arquivo_final)
-#     contando_operadoress = iniciando.contando_oepradores(arquivo_final)
-
-#     col1,col2 = st.columns(2)
-#     st.text(f"{dividindo_operadores['Operador'].value_counts().to_string()}")
-#     with col1:
-#         seletor_operador = st.selectbox('Operadores',options=dividindo_operadores['Operador'].unique())
-#         dividindo_operadores = dividindo_operadores.loc[dividindo_operadores['Operador']==seletor_operador] 
-
-
-
-#     cores = {'Inativo':'background-color: yellow',
-#             'Ativo':'background-color: green',
-#             'Pode Operar':'background-color: green',
-#             'Checar conta':'background-color: red',
-#             'Encerrado':'background-color: #A0522D',
-#             np.nan:'background-color: #A0522D'}
-        
-    
-#     st.dataframe(dividindo_operadores.style.applymap(lambda x: cores[x], subset=['Status']),use_container_width=True)
-#     st.subheader('Checar contas')
-#     st.dataframe(contas_nao_contradas)
-#     st.text(f" Contagem Total de clientes por {contando_operadoress['Operador'].value_counts().to_string()}")
 
 
 

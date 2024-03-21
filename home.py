@@ -473,13 +473,14 @@ if selecionar == 'Divisão de operadores':
         else:
             ''
     if corretora == 'Guide':
-        controle = le_excel('Controle de Contratos - Atualizado Fevereiro de 2024 (5).xlsx',3,1)
+
+        controle_g = le_excel('Controle de Contratos - Atualizado Fevereiro de 2024 (5).xlsx',3,1)
         pl = le_excel('Bluemetrix20240318_ABS.xlsx',0,0)
         saldo = le_excel('IClientBalance-20240321-110159-af1ee8.xlsx',0,0)
 
 
         iniciando = Guide_Divisao_contas()
-        arquivo_final = iniciando.trabalhando_dados()
+        arquivo_final = iniciando.trabalhando_dados(controle_g=controle_g,pl=pl,saldo=saldo)
         dividindo_operadores = iniciando.dividindo_contas(arquivo_final=arquivo_final)
         contas_nao_contradas = iniciando.contas_nao_encontradas(arquivo_compilado=arquivo_final)
         contando_operadoress = iniciando.contando_oepradores(arquivo_final)

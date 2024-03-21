@@ -15,7 +15,7 @@ class Divisao_de_contas():
         self.pl =  pl
 
         
-        self.controle = self.controle.iloc[:-5,[1,2,6,7,12,16,17,18,-1]].drop(0).rename(columns={
+        self.controle = self.controle.iloc[:-5,[1,2,6,7,12,16,17,18,-1]].rename(columns={
             'Unnamed: 1':'Nome','Unnamed: 2':'Conta','Mesa de Operação':'Operador','Backoffice/ Mesa':'Status','Unnamed: 12':'Perfil da carteira',
             'Mesa de Operação.1':'Avisos Mesa','Gestão/ Head comercial':'Avisos comercial','Backoffice.2 ':'Avisos Backoffice','Unnamed: 80':'PL Controle'
         })

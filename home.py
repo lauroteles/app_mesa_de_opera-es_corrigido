@@ -18,6 +18,7 @@ import time
 import pytz
 import divisao_de_operadores
 from divisao_de_operadores import Divisao_de_contas
+from divisao_guide import Guide_Divisao_contas
 
 t0 = time.perf_counter()
 
@@ -46,6 +47,7 @@ planilha_controle1 = le_excel('controle.xlsx',0,0)
 co_admin = le_excel('Controle de Contratos - Carteiras Co-Administradas.xlsx',1,1)
 controle_psicao = le_excel('controle.xlsx',0,1)
 rentabilidade = le_excel('Rentabilidade (1).xlsx',0,0)
+bancos = le_excel('Limite Bancos 06_23.xlsx',0,1)
 
 pl = pl_original.copy()
 controle = controle_original.copy()
@@ -169,9 +171,6 @@ if selecionar == 'Produtos':
     produtos['PRODUTO'] = produtos['PRODUTO'].fillna(0)
     produtos = produtos[produtos['PRODUTO'] !=0]
 
-
-    #----------------------------------
-    # Seleção para filtragem de produtos
 
     bancos_que_podem_ser_utilizados = [
 'Banco ABC',
@@ -324,55 +323,23 @@ if selecionar == 'Produtos':
     #Calculando a curva 
 
     fig2=go.Figure()
-    fig2.add_traces(go.Scatter(x=curva_base['Data'],
-                        y=curva_base['Taxa Spot'],
-                        mode='lines',
-                        name='PREF',
-                        line=dict(color='white',width = 6),
+    fig2.add_traces(go.Scatter(x=curva_base['Data'],y=curva_base['Taxa Spot'],mode='lines',name='PREF',line=dict(color='white',width = 6),
                         
                         ))
     curva_do_ipca=go.Figure()
-    curva_do_ipca.add_traces(go.Scatter(x=curva_inflacao_copia['Vencimento'],
-                        y=curva_inflacao_copia['ETTJ IPCA'],
-                        mode='lines',
-                        name='PREF',
-                        line=dict(color='#DC143C')
-                        ))      
+    curva_do_ipca.add_traces(go.Scatter(x=curva_inflacao_copia['Vencimento'],y=curva_inflacao_copia['ETTJ IPCA'],mode='lines',name='PREF',line=dict(color='#DC143C')))      
 
 
-    #----------------------------------
-    #Graficos
     produtos.sort_values(by='Vencimento',inplace=True)
     produtos_com_curva = go.Figure()
     for produto, dados in produtos.groupby('PRODUTO'):
-        produtos_com_curva.add_trace(go.Scatter(
-            x=dados['Vencimento'],
-            y=dados['TAXA EQ. CDB'],
-            mode='lines+markers',
-            name=produto,
-            text=produtos.apply(
-                    lambda row: f'O vencimento e em:  **{row["Vencimento"]}** e a Taxa do produto é:  **{row["TAXA EQ. CDB"]:.2f}%**  e o Banco emissor:  **{row["PRODUTO"]}**',axis=1),
-                
-        ))
+        produtos_com_curva.add_trace(go.Scatter(x=dados['Vencimento'],y=dados['TAXA EQ. CDB'],mode='lines+markers',name=produto,text=produtos.apply(
+                    lambda row: f'O vencimento e em:  **{row["Vencimento"]}** e a Taxa do produto é:  **{row["TAXA EQ. CDB"]:.2f}%**  e o Banco emissor:  **{row["PRODUTO"]}**',axis=1),))
         produtos_com_curva.update_layout(
-        title=dict(text='Evolução PL dos Assessores ao longo do tempo',
-                                                     font=dict(size=20),
-                                                     x=0.1,
-                                                     y=0.9),
-                                                    showlegend=True,
-                                                    
-                                                    height=600,
-                                                    width = 1500,   
-                                                    xaxis=dict(
-        showticklabels=True,  # Ative a exibição de rótulos no eixo x
-        #tickmode='array',    # Modo de exibição de rótulos
-        #tickvals=dados['Vencimento'][::6],  # Ajuste os valores dos rótulos para cada 6 períodos
-        #ticktext=dados['Vencimento'][::6],       
-        ))
+        title=dict(text='Evolução PL dos Assessores ao longo do tempo', font=dict(size=20), x=0.1, y=0.9),showlegend=True,height=600,width = 1500,   xaxis=dict(
+        showticklabels=True,))
         produtos_com_curva.update_yaxes(range=[9,12.5])      
 
-    
-    
     #----------------------------------
     #Scatter graph com curva:
     
@@ -380,66 +347,24 @@ if selecionar == 'Produtos':
     fig = go.Figure()
     if  lc in ['CDB','LCA' ,'LCI','LC'] and  pre_pos == 'PRÉ':    
         fig.add_trace(
-            go.Scatter(
-                x=produtos['Vencimento'],
-                y=produtos['TAXA EQ. CDB'],
-                mode='markers',
-                marker=dict(
-                size = 8,
-                color = 'grey'     
-                ),
-                text=produtos.apply(
-                    lambda row: f'O vencimento e em:  **{row["Vencimento"]}** e a Taxa do produto é:  **{row["TAXA EQ. CDB"]:.2f}%**  e o Banco emissor:  **{row["PRODUTO"]}**',axis=1),
-                
-            )
-        )
+            go.Scatter(x=produtos['Vencimento'],y=produtos['TAXA EQ. CDB'],mode='markers',marker=dict(size = 8,color = 'grey'     ),text=produtos.apply(    lambda row: f'O vencimento e em:  **{row["Vencimento"]}** e a Taxa do produto é:  **{row["TAXA EQ. CDB"]:.2f}%**  e o Banco emissor:  **{row["PRODUTO"]}**',axis=1),
+                ))
 
     elif lc in ['CDB','LCA' ,'LCI','LC'] and pre_pos  =='PÓS':
         fig.add_trace(
-            go.Scatter(
-                x=produtos['Vencimento'],
-                y=produtos['TAXA EQ. CDB'],
-                mode='markers',
-                marker=dict(
-                size = 8,
-                color = 'grey'     
-                ),
-               text=produtos.apply(
-                    lambda row: f'O praze de vencimento e em:  {row["Vencimento"]}  dias   e a Taxa do produto é:  {row["TAXA EQ. CDB"]:.2f}%  e o Banco emissor:  {row["PRODUTO"]}',axis=1),
-               
-        )
-    )
+            go.Scatter( x=produtos['Vencimento'], y=produtos['TAXA EQ. CDB'], mode='markers', marker=dict( size = 8, color = 'grey'      ),text=produtos.apply(
+                    lambda row: f'O praze de vencimento e em:  {row["Vencimento"]}  dias   e a Taxa do produto é:  {row["TAXA EQ. CDB"]:.2f}%  e o Banco emissor:  {row["PRODUTO"]}',axis=1),))
     
     elif lc  == 'Inflação':
         fig_inflacao = go.Figure()
         fig_inflacao.add_trace(
-            go.Scatter(
-                x=produtos['Vencimento'],
-                y=produtos['TAXA'],
-                mode='markers',
-                marker=dict(
-                size = 8,
-                color = 'grey'     
-                ),
-               text=produtos.apply(
-                    lambda row: f'O praze de vencimento e em:  {row["Vencimento"]}  dias   e a Taxa do produto é:  {row["TAXA"]}%  e o Banco emissor:  {row["PRODUTO"]}',axis=1),
-               
-        )
-    )
+            go.Scatter( x=produtos['Vencimento'], y=produtos['TAXA'], mode='markers', marker=dict( size = 8, color = 'grey'),text=produtos.apply(
+                    lambda row: f'O praze de vencimento e em:  {row["Vencimento"]}  dias   e a Taxa do produto é:  {row["TAXA"]}%  e o Banco emissor:  {row["PRODUTO"]}',axis=1),))
 
 
     figura_inflacao_implicita = go.Figure()
     figura_inflacao_implicita.add_trace(
-        go.Line(
-            x=curva_inflacao_copia['Vertices'],
-            y=curva_inflacao_copia['Inflação Implícita'],
-            marker=dict(
-            size = 8,
-            color = 'red'     
-            ),
-            
-    )
-)
+        go.Line(x=curva_inflacao_copia['Vertices'],y=curva_inflacao_copia['Inflação Implícita'],marker=dict(size = 8,color = 'red'),))
     figura_inflacao_implicita.update_yaxes(range=[3,6])
     figura_inflacao_implicita.update_xaxes(range=[0,2700])  
 
@@ -449,16 +374,8 @@ if selecionar == 'Produtos':
         title = 'Produtos ofertadors',
         shapes =[dict(
             type='line',
-            y0=100,
-            y1=100,
-            x0=0,
-            x1=1,
-            xref='paper',
-            yref='y',
-            line=dict(color='#FF8C00',width=2,dash='dash')
-        )
-        ]
-    )
+            y0=100,y1=100,x0=0,x1=1,xref='paper',yref='y',line=dict(color='#FF8C00',width=2,dash='dash'))])
+    
     if lc in ['CDB','LCA' ,'LCI','LC']  and pre_pos =='PRÉ':
         fig.update_yaxes(range=[8,13])
 
@@ -495,12 +412,21 @@ if selecionar == 'Produtos':
 
     elif lc in 'Inflação Implícita':    
         st.plotly_chart(figura_inflacao_implicita)  
-
        
-
+    col1,col2 = st.columns(2)
     produtos = produtos.drop(columns=['PRAZO/VENCIMENTO','TAXA EQ. CDB'])
-    st.dataframe(produtos)
-           
+    with col1:
+        bancos =    bancos.iloc[:,:6]
+        bancos['Risco'] = round(bancos['Risco'],2)
+        seletor_bancos = st.text_input('')
+
+        if seletor_bancos.strip():
+            bancos = bancos[bancos['Emissores'].str.contains(seletor_bancos,case=False)]
+        else:
+            bancos = bancos    
+        st.dataframe(bancos)    
+    with col2 :
+        st.dataframe(produtos)
 
 
 #----------------------------------  ---------------------------------- ---------------------------------- ---------------------------------- 
@@ -508,43 +434,76 @@ if selecionar == 'Produtos':
 #---------------------------------- ---------------------------------- ---------------------------------- ---------------------------------- 
 
 if selecionar == 'Divisão de operadores':
-    saldo_original1 = le_excel('Saldo.xlsx',0,0)
-    pl_original1 = le_excel('PL Total.xlsx',0,0)
-    controle_2 = le_excel('controle.xlsx',0,1)
+    corretora = st.radio('',['BTG','Guide'])
+    if corretora == 'BTG':    
+        saldo_original1 = le_excel('Saldo.xlsx',0,0)
+        pl_original1 = le_excel('PL Total.xlsx',0,0)
+        controle_2 = le_excel('Controle de Contratos - Atualizado Fevereiro de 2024 (5).xlsx',2,1)
 
-    arquivo1 = Divisao_de_contas()
+        arquivo1 = Divisao_de_contas()
 
-    arquivo_compilado = arquivo1.limpando_dados(controle=controle_2,saldo=saldo_original1,pl=pl_original1)
+        arquivo_compilado = arquivo1.limpando_dados(controle=controle_2,saldo=saldo_original1,pl=pl_original1)
 
-    filtrando_saldo = arquivo1.filtrando_dados_e_separando_operadores(arquivo_compilado=arquivo_compilado)
-    contando_operadores = arquivo1.contando_oepradores(arquivo_compilado=arquivo_compilado)
+        filtrando_saldo = arquivo1.filtrando_dados_e_separando_operadores(arquivo_compilado=arquivo_compilado)
+        contando_operadores = arquivo1.contando_oepradores(arquivo_compilado=arquivo_compilado)
 
-    col1,col2 = st.columns(2)
-    st.text(f"{filtrando_saldo['Operador'].value_counts().to_string()}")
-    with col1:
-        seletor_operador = st.selectbox('Operadores',options=filtrando_saldo['Operador'].unique())
-        filtrando_saldo = filtrando_saldo.loc[filtrando_saldo['Operador']==seletor_operador] 
+        col1,col2 = st.columns(2)
+        st.text(f"{filtrando_saldo['Operador'].value_counts().to_string()}")
+        with col1:
+            seletor_operador = st.selectbox('Operadores',options=filtrando_saldo['Operador'].unique())
+            filtrando_saldo = filtrando_saldo.loc[filtrando_saldo['Operador']==seletor_operador] 
 
 
 
-    cores = {'Inativo':'background-color: yellow',
-            'Ativo':'background-color: green',
-            'Pode Operar':'background-color: green',
-            'Checar conta':'background-color: red',
-            np.nan:'background-color: #B8860B'}
+        cores = {'Inativo':'background-color: yellow',
+                'Ativo':'background-color: green',
+                'Pode Operar':'background-color: green',
+                'Checar conta':'background-color: red',
+                np.nan:'background-color: #B8860B'}
+            
         
-    
-    st.dataframe(filtrando_saldo.style.applymap(lambda x: cores[x], subset=['Status']),use_container_width=True)
+        st.dataframe(filtrando_saldo.style.applymap(lambda x: cores[x], subset=['Status']),use_container_width=True)
 
-    contas_faltantes = arquivo1.contas_nao_encontradas(arquivo_compilado=arquivo_compilado)
+        contas_faltantes = arquivo1.contas_nao_encontradas(arquivo_compilado=arquivo_compilado)
 
-    st.text(f" Contagem Total de clientes por {contando_operadores['Operador'].value_counts().to_string()}")
-    if contas_faltantes is not None:
-        st.subheader('Checar Contas')
-        st.dataframe(contas_faltantes)
-    else:
-        ''
+        st.text(f" Contagem Total de clientes por {contando_operadores['Operador'].value_counts().to_string()}")
+        if contas_faltantes is not None:
+            st.subheader('Checar Contas')
+            st.dataframe(contas_faltantes)
+        else:
+            ''
+    if corretora == 'Guide':
+        controle = le_excel('Controle de Contratos - Atualizado Fevereiro de 2024 (5).xlsx',3,1)
+        pl = le_excel('Bluemetrix20240318_ABS.xlsx',0,0)
+        saldo = le_excel('IClientBalance-20240321-110159-af1ee8.xlsx',0,0)
 
+
+        iniciando = Guide_Divisao_contas()
+        arquivo_final = iniciando.trabalhando_dados()
+        dividindo_operadores = iniciando.dividindo_contas(arquivo_final=arquivo_final)
+        contas_nao_contradas = iniciando.contas_nao_encontradas(arquivo_compilado=arquivo_final)
+        contando_operadoress = iniciando.contando_oepradores(arquivo_final)
+
+        col1,col2 = st.columns(2)
+        st.text(f"{dividindo_operadores['Operador'].value_counts().to_string()}")
+        with col1:
+            seletor_operador = st.selectbox('Operadores',options=dividindo_operadores['Operador'].unique())
+            dividindo_operadores = dividindo_operadores.loc[dividindo_operadores['Operador']==seletor_operador] 
+
+
+
+        cores = {'Inativo':'background-color: yellow',
+                'Ativo':'background-color: green',
+                'Pode Operar':'background-color: green',
+                'Checar conta':'background-color: red',
+                'Encerrado':'background-color: #A0522D',
+                np.nan:'background-color: #A0522D'}
+            
+        
+        st.dataframe(dividindo_operadores.style.applymap(lambda x: cores[x], subset=['Status']),use_container_width=True)
+        st.subheader('Checar contas')
+        st.dataframe(contas_nao_contradas)
+        st.text(f" Contagem Total de clientes por {contando_operadoress['Operador'].value_counts().to_string()}")
 
 #----------------------------------  ---------------------------------- ---------------------------------- ---------------------------------- 
 # Pagina de Analise

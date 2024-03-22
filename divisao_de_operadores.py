@@ -31,14 +31,13 @@ class Divisao_de_contas():
     def filtrando_dados_e_separando_operadores(self,arquivo_compilado):
 
         self.arquivo_compilado = arquivo_compilado
-
         self.filtrando_saldo = self.arquivo_compilado.loc[(self.arquivo_compilado['Saldo']>1000)|(self.arquivo_compilado['Saldo']<0)].sort_values(by='Saldo',ascending=False)
 
         self.filtrando_saldo.loc[self.filtrando_saldo['Valor']>700000, 'Operador'] = 'Bruno'
         self.filtrando_saldo.loc[(self.filtrando_saldo['Valor'] > 400000) & (self.filtrando_saldo['Valor'] < 700000), 'Operador'] = 'Breno'
         self.filtrando_saldo.loc[self.filtrando_saldo['Valor']<400000, 'Operador'] = 'Augusto'
         colunas_ajustar_decimal = ['Saldo','Valor']
-        contas_co_admin = ['005338054','004313254','005190138','004724018','004641487','004643737','004855570','004855596','004643746','005320069','004884046','005053939']
+        contas_co_admin = ['004313254','005190138','004724018','004641487','004643737','004855570','004855596','004643746','005320069','004884046','005053939']
         self.filtrando_saldo = self.filtrando_saldo[~self.filtrando_saldo['Conta'].isin(contas_co_admin)]
 
         for coluna in colunas_ajustar_decimal:
@@ -56,10 +55,34 @@ class Divisao_de_contas():
 
     def contando_oepradores(self,arquivo_compilado):
         self.arquivo_compilado = arquivo_compilado
-        self.arquivo_compilado = self.arquivo_compilado[self.arquivo_compilado['Status']=='Inativo']
+        #self.arquivo_compilado = self.arquivo_compilado[self.arquivo_compilado['Status']=='Inativo']
         self.arquivo_compilado.loc[self.arquivo_compilado['Valor']>700000, 'Operador'] = 'Bruno'
         self.arquivo_compilado.loc[(self.arquivo_compilado['Valor'] > 400000) & (self.arquivo_compilado['Valor'] < 700000), 'Operador'] = 'Breno'
         self.arquivo_compilado.loc[self.arquivo_compilado['Valor']<400000, 'Operador'] = 'Augusto'
 
         return self.arquivo_compilado
-        
+    
+    def novas_contas(self,controle_novas,saldo,pl):
+        self.controle_novas_contas = controle_novas
+        self.saldo = saldo
+        self.pl =  pl
+
+        print(self.controle.info())
+        # self.controle = self.controle.iloc[:-5,[0,2,6,7,12,16,17,18]].rename(columns={
+        #     'Unnamed: 1':'Nome','Unnamed: 2':'Conta','Mesa de Operação':'Operador','Backoffice/ Mesa':'Status','Unnamed: 12':'Perfil da carteira',
+        #     'Mesa de Operação.1':'Avisos Mesa','Gestão/ Head comercial':'Avisos comercial','Backoffice.2 ':'Avisos Backoffice',
+        # })
+    
+        self.controle_novas_contas['Conta'] = self.controle_novas_contas['Conta'].astype(str).apply(lambda x: '00'+x).str[:-2]
+
+        self.saldo = saldo.iloc[:,[0,2]]
+        self.pl = pl.iloc[:,[0,2]]
+        contas_novas = list(self.controle_novas_contas['Conta'])
+        self.arquivo_compilado = pd.merge(self.saldo,self.pl,on='Conta',how='outer').merge(self.controle_novas_contas,on='Conta',how='outer').iloc[:,[0,3,1,5,6,7,8,9,10,2,4]]
+        self.arquivo_compilado = self.arquivo_compilado[self.arquivo_compilado['Conta'].isin(contas_novas)]
+        self.arquivo_compilado = self.arquivo_compilado[self.arquivo_compilado['Saldo'].notnull()]
+        return self.arquivo_compilado       
+
+
+
+

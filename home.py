@@ -146,7 +146,7 @@ if selecionar == 'Carteiras':
                 basket_venda = basket_[basket_['C/V']=='V']
                 basket_venda['Valor'] = basket_venda['Quantidade']*basket_venda['Preço']
                 st.warning(f' O saldo Nescessario para Compra : {basket_compra["Valor"].sum():,.2f}')
-                st.warning(f' O saldo Nescessario para Venda : {basket_venda["Valor"].sum():,.2f}')
+                st.warning(f' O saldo Gerado pela Venda : {basket_venda["Valor"].sum():,.2f}')
                 st.dataframe(basket_)
 
             with col2:
@@ -435,16 +435,18 @@ if selecionar == 'Produtos':
 
 if selecionar == 'Divisão de operadores':
     corretora = st.radio('',['BTG','Guide'])
-    if corretora == 'BTG':    
+    if corretora == 'BTG':
+        controle_novas = le_excel('Controle de Contratos - Atualizado Fevereiro de 2024 (5).xlsx',1,0)    
         saldo_original1 = le_excel('Saldo.xlsx',0,0)
         pl_original1 = le_excel('PL Total.xlsx',0,0)
         controle_2 = le_excel('Controle de Contratos - Atualizado Fevereiro de 2024 (5).xlsx',2,1)
 
         arquivo1 = Divisao_de_contas()
-
         arquivo_compilado = arquivo1.limpando_dados(controle=controle_2,saldo=saldo_original1,pl=pl_original1)
+        arquivo_novas_contas = arquivo1.novas_contas(controle_novas=controle_novas,saldo=saldo,pl=pl)
 
         filtrando_saldo = arquivo1.filtrando_dados_e_separando_operadores(arquivo_compilado=arquivo_compilado)
+        #filtrando_saldo_novas_contas = arquivo1.filtrando_dados_e_separando_operadores(arquivo_compilado=arquivo_novas_contas)
         contando_operadores = arquivo1.contando_oepradores(arquivo_compilado=arquivo_compilado)
 
         col1,col2 = st.columns(2)
@@ -465,7 +467,9 @@ if selecionar == 'Divisão de operadores':
         st.dataframe(filtrando_saldo.style.applymap(lambda x: cores[x], subset=['Status']),use_container_width=True)
 
         contas_faltantes = arquivo1.contas_nao_encontradas(arquivo_compilado=arquivo_compilado)
-
+        st.subheader('Novas Contas ')
+        #st.dataframe(filtrando_saldo_novas_contas)
+        st.dataframe(arquivo_novas_contas)
         st.text(f" Contagem Total de clientes por {contando_operadores['Operador'].value_counts().to_string()}")
         if contas_faltantes is not None:
             st.subheader('Checar Contas')

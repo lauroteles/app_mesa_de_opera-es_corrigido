@@ -20,7 +20,7 @@ class Guide_Divisao_contas():
         self.controle['Conta'] = self.controle['Conta'].str[:-1]
 
         self.arquivo_final = pd.merge(self.controle,self.pl, on='Conta',how='outer')
-        self.arquivo_final = self.arquivo_final.merge(self.saldo,on='Conta',how='outer')
+        self.arquivo_final = self.arquivo_final.merge(self.saldo,on='Conta',how='outer').iloc[:,[1,0,11,2,3,4,5,6,7,8,9,10]]
 
         return self.arquivo_final
 

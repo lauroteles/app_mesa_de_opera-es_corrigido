@@ -477,7 +477,7 @@ if selecionar == 'Divisão de operadores':
     if corretora == 'Guide':
 
         controle_g = le_excel('Controle de Contratos - Atualizado Fevereiro de 2024 (5).xlsx',3,1)
-        pl = le_excel('Bluemetrix20240318_ABS.xlsx',0,0)
+        pl = le_excel('Bluemetrix.xlsx',0,0)
         saldo = le_excel('Saldo_guide.xlsx',0,0)
 
 

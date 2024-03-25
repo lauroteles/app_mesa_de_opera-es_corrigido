@@ -321,7 +321,11 @@ if selecionar == 'Produtos':
     curva_inflacao_copia['Vencimento'] = curva_inflacao_copia['Vencimento'].dt.strftime('%Y-%m-%d')                                                               
     #----------------------------------
     #Calculando a curva 
-
+    hover_template = (
+        "O prazo de vencimento é em: %{x}<br>"
+        "A Taxa do produto é: %{y}%<br>"
+        "O Banco emissor: %{text}<br>")
+    
     fig2=go.Figure()
     fig2.add_traces(go.Scatter(x=curva_base['Data'],y=curva_base['Taxa Spot'],mode='lines',name='PREF',line=dict(color='white',width = 6),
                         
@@ -333,8 +337,8 @@ if selecionar == 'Produtos':
     produtos.sort_values(by='Vencimento',inplace=True)
     produtos_com_curva = go.Figure()
     for produto, dados in produtos.groupby('PRODUTO'):
-        produtos_com_curva.add_trace(go.Scatter(x=dados['Vencimento'],y=dados['TAXA EQ. CDB'],mode='lines+markers',name=produto,text=produtos.apply(
-                    lambda row: f'O vencimento e em:  **{row["Vencimento"]}** e a Taxa do produto é:  **{row["TAXA EQ. CDB"]:.2f}%**  e o Banco emissor:  **{row["PRODUTO"]}**',axis=1),))
+        produtos_com_curva.add_trace(go.Scatter(x=dados['Vencimento'],y=dados['TAXA EQ. CDB'],mode='lines+markers',name=produto,text=produtos,
+                                                hovertemplate=hover_template))
         produtos_com_curva.update_layout(
         title=dict(text='Evolução PL dos Assessores ao longo do tempo', font=dict(size=20), x=0.1, y=0.9),showlegend=True,height=600,width = 1500,   xaxis=dict(
         showticklabels=True,))
@@ -342,24 +346,25 @@ if selecionar == 'Produtos':
 
     #----------------------------------
     #Scatter graph com curva:
-    
+
 
     fig = go.Figure()
     if  lc in ['CDB','LCA' ,'LCI','LC'] and  pre_pos == 'PRÉ':    
         fig.add_trace(
-            go.Scatter(x=produtos['Vencimento'],y=produtos['TAXA EQ. CDB'],mode='markers',marker=dict(size = 8,color = 'grey'     ),text=produtos.apply(    lambda row: f'O vencimento e em:  **{row["Vencimento"]}** e a Taxa do produto é:  **{row["TAXA EQ. CDB"]:.2f}%**  e o Banco emissor:  **{row["PRODUTO"]}**',axis=1),
-                ))
+            go.Scatter(x=produtos['Vencimento'],y=produtos['TAXA EQ. CDB'],mode='markers',marker=dict(size = 8,color = 'grey'     ),text=produtos,
+                       hovertemplate=hover_template))
 
     elif lc in ['CDB','LCA' ,'LCI','LC'] and pre_pos  =='PÓS':
         fig.add_trace(
-            go.Scatter( x=produtos['Vencimento'], y=produtos['TAXA EQ. CDB'], mode='markers', marker=dict( size = 8, color = 'grey'      ),text=produtos.apply(
-                    lambda row: f'O praze de vencimento e em:  {row["Vencimento"]}  dias   e a Taxa do produto é:  {row["TAXA EQ. CDB"]:.2f}%  e o Banco emissor:  {row["PRODUTO"]}',axis=1),))
+            go.Scatter( x=produtos['Vencimento'], y=produtos['TAXA EQ. CDB'], mode='markers', marker=dict( size = 8, color = 'grey'      ),text=produtos,
+                       hovertemplate=hover_template))
     
     elif lc  == 'Inflação':
         fig_inflacao = go.Figure()
         fig_inflacao.add_trace(
-            go.Scatter( x=produtos['Vencimento'], y=produtos['TAXA'], mode='markers', marker=dict( size = 8, color = 'grey'),text=produtos.apply(
-                    lambda row: f'O praze de vencimento e em:  {row["Vencimento"]}  dias   e a Taxa do produto é:  {row["TAXA"]}%  e o Banco emissor:  {row["PRODUTO"]}',axis=1),))
+            go.Scatter( x=produtos['Vencimento'], y=produtos['TAXA'], mode='markers', marker=dict( size = 8, color = 'grey'),
+                       text=produtos,
+                       hovertemplate=hover_template))
 
 
     figura_inflacao_implicita = go.Figure()

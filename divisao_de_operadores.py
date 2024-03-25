@@ -54,8 +54,9 @@ class Divisao_de_contas():
         return self.contas_nao_encontrados
 
     def contando_oepradores(self,arquivo_compilado):
+        
         self.arquivo_compilado = arquivo_compilado
-        #self.arquivo_compilado = self.arquivo_compilado[self.arquivo_compilado['Status']=='Inativo']
+
         self.arquivo_compilado.loc[self.arquivo_compilado['Valor']>700000, 'Operador'] = 'Bruno'
         self.arquivo_compilado.loc[(self.arquivo_compilado['Valor'] > 400000) & (self.arquivo_compilado['Valor'] < 700000), 'Operador'] = 'Breno'
         self.arquivo_compilado.loc[self.arquivo_compilado['Valor']<400000, 'Operador'] = 'Augusto'
@@ -67,12 +68,6 @@ class Divisao_de_contas():
         self.saldo = saldo
         self.pl =  pl
 
-        print(self.controle.info())
-        # self.controle = self.controle.iloc[:-5,[0,2,6,7,12,16,17,18]].rename(columns={
-        #     'Unnamed: 1':'Nome','Unnamed: 2':'Conta','Mesa de Operação':'Operador','Backoffice/ Mesa':'Status','Unnamed: 12':'Perfil da carteira',
-        #     'Mesa de Operação.1':'Avisos Mesa','Gestão/ Head comercial':'Avisos comercial','Backoffice.2 ':'Avisos Backoffice',
-        # })
-    
         self.controle_novas_contas['Conta'] = self.controle_novas_contas['Conta'].astype(str).apply(lambda x: '00'+x).str[:-2]
 
         self.saldo = saldo.iloc[:,[0,2]]

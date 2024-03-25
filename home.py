@@ -446,7 +446,6 @@ if selecionar == 'Divisão de operadores':
         arquivo_novas_contas = arquivo1.novas_contas(controle_novas=controle_novas,saldo=saldo,pl=pl)
 
         filtrando_saldo = arquivo1.filtrando_dados_e_separando_operadores(arquivo_compilado=arquivo_compilado)
-        #filtrando_saldo_novas_contas = arquivo1.filtrando_dados_e_separando_operadores(arquivo_compilado=arquivo_novas_contas)
         contando_operadores = arquivo1.contando_oepradores(arquivo_compilado=arquivo_compilado)
 
         col1,col2 = st.columns(2)
@@ -468,7 +467,6 @@ if selecionar == 'Divisão de operadores':
 
         contas_faltantes = arquivo1.contas_nao_encontradas(arquivo_compilado=arquivo_compilado)
         st.subheader('Novas Contas ')
-        #st.dataframe(filtrando_saldo_novas_contas)
         st.dataframe(arquivo_novas_contas)
         st.text(f" Contagem Total de clientes por {contando_operadores['Operador'].value_counts().to_string()}")
         if contas_faltantes is not None:

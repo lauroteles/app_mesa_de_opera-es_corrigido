@@ -441,10 +441,10 @@ if selecionar == 'Produtos':
 if selecionar == 'Divisão de operadores':
     corretora = st.radio('',['BTG','Guide'])
     if corretora == 'BTG':
-        controle_novas = le_excel('Controle de Contratos - Atualizado Fevereiro de 2024 (5).xlsx',1,0)    
+        controle_novas = le_excel('Controle de Contratos.xlsx',1,0)    
         saldo_original1 = le_excel('Saldo.xlsx',0,0)
         pl_original1 = le_excel('PL Total.xlsx',0,0)
-        controle_2 = le_excel('Controle de Contratos - Atualizado Fevereiro de 2024 (5).xlsx',2,1)
+        controle_2 = le_excel('Controle de Contratos.xlsx',2,1)
 
         arquivo1 = Divisao_de_contas()
         arquivo_compilado = arquivo1.limpando_dados(controle=controle_2,saldo=saldo_original1,pl=pl_original1)
@@ -481,7 +481,7 @@ if selecionar == 'Divisão de operadores':
             ''
     if corretora == 'Guide':
 
-        controle_g = le_excel('Controle de Contratos - Atualizado Fevereiro de 2024 (5).xlsx',3,1)
+        controle_g = le_excel('Controle de Contratos.xlsx',3,1)
         pl = le_excel('Bluemetrix.xlsx',0,0)
         saldo = le_excel('Saldo_guide.xlsx',0,0)
 

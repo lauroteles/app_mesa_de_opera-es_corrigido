@@ -14,7 +14,7 @@ class Guide_Divisao_contas():
         self.controle = self.controle.iloc[:,[1,2,6,7,8,12,19,20,21,-1]]
         self.pl = self.pl.iloc[:,[1,11]].rename(columns={'CLIE_ID':'Conta','SALDO_BRUTO':'PL'})
         self.pl = self.pl.groupby('Conta')['PL'].sum().reset_index()
-        self.saldo = self.saldo.iloc[:,[2,5]].rename(columns={'Cod. Conta Local':'Conta','Saldo Previsto':'Saldo'})
+        self.saldo = self.saldo.loc[:,['Cod. Conta Local','Saldo Previsto']].rename(columns={'Cod. Conta Local':'Conta','Saldo Previsto':'Saldo'})
         self.pl['Conta'] = self.pl['Conta'].astype(str)
         self.saldo['Conta'] = self.saldo['Conta'].astype(str)
         self.controle['Conta'] = self.controle['Conta'].str[:-1]

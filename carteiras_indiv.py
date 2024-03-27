@@ -108,7 +108,7 @@ class Basket_enquadramento_carteiras():
         return st.plotly_chart(posicao_ideal_da_carteira)    
     
     def criacao_basket(self,carteira_modelo,dados_finais,input_conta):
-        carteira_modelo = carteira_modelo[carteira_modelo['Ativo'].str.contains('3')]
+        carteira_modelo = carteira_modelo[(carteira_modelo['Ativo'].str.contains('3'))|(carteira_modelo['Ativo'].str.contains('11'))]
         dados_finais = dados_finais[dados_finais['Produto'].str.contains('3')]
         basket = pd.merge(carteira_modelo.iloc[:,[0,2]],dados_finais.iloc[:,[0,2]],left_on='Ativo',right_on='Produto',how='outer')
         precos_de_mercado = []

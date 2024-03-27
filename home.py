@@ -30,7 +30,7 @@ selecionar = st.sidebar.radio('Selecione uma opção', paginas)
 
 #---------------------------------- 
 # Variaveis globais
-@st.cache_data(ttl='3m')     
+@st.cache_data(ttl='5m')     
 def le_excel(x,page,row):
     df = pd.read_excel(x,page,skiprows=row)
     return df
@@ -114,8 +114,15 @@ if selecionar == 'Carteiras':
             carteira_modelo = inciando_programa.selecionando_modelo_de_carteira(trantrando_dados_controle,
                                                                                 carteira_arrojada,carteira_conservadora,carteira_moderada,
                                                                                 carteira_income,carteira_equity,carteira_small,carteira_dividendos,carteira_fii)
-        
-            carteira_modelo['Valor R$'] = carteira_modelo['Proporção']*patrimono_liquido_da_conta
+            
+            
+            pl_manual = st.sidebar.number_input('Escolher valor de PL',key='Adicionar pl manual',value= patrimono_liquido_da_conta,format="%.2f")
+
+            if pl_manual is None:
+                carteira_modelo['Valor R$'] = carteira_modelo['Proporção']*patrimono_liquido_da_conta
+            else:    
+                carteira_modelo['Valor R$'] = carteira_modelo['Proporção']*pl_manual
+            
             carteira_modelo['Proporção'] = carteira_modelo['Proporção'].map(lambda x: f"{x * 100:,.2f}  %")
 
             try:
@@ -136,7 +143,7 @@ if selecionar == 'Carteiras':
             col1,col2 = st.columns(2)
             with col1:
                 if st.toggle('Enquadramento da carteira'):
-                            grafico_estrategia = inciando_programa.checando_estrategia(dados_finais)
+                    grafico_estrategia = inciando_programa.checando_estrategia(dados_finais)
                 else:                    
                     posicao_atual_grafico = inciando_programa.criando_graficos_posicao_atual(dados_finais)
 
@@ -151,7 +158,11 @@ if selecionar == 'Carteiras':
                 st.dataframe(basket_)
 
             with col2:
+
                 grafico_posicao_ideal = inciando_programa.criando_graficos_posicao_ideal(carteira_modelo=carteira_modelo)
+                st.text("")
+                st.text("")
+                st.text("")
                 st.dataframe(carteira_modelo.sort_values(by='Ativo'),use_container_width=True)
 
                 grafico_rentabilidade = inciando_programa.grafico_rentabilidade(rentabilidade,input_conta)

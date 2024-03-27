@@ -125,7 +125,7 @@ class Basket_enquadramento_carteiras():
         self.basket['C/V'] = np.where(self.basket['Valor_compra_venda']>0,'C','V')
         self.basket['Validade']='DIA'
         self.basket['Conta'] = input_conta
-        self.basket = self.basket.rename(columns={'Cotação atual':'Preço'}).iloc[:,[0,7,6,4,9,8]]
+        self.basket = self.basket.rename(columns={'Cotação atual':'Preço'}).iloc[:,[0,7,6,4,9,8]]#.sort_values(by='Ativo')
 
         return self.basket
     

@@ -15,7 +15,7 @@ colors_dark_brewers = ['#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c']
 equities = {'ARZZ3': 5,'ASAI3':6.50,'BBSE3':5,'CPFE3':5.50,'EGIE3':5.50,'HYPE3':8.00,'KEPL3':8.75,
             'LEVE3':5,'PRIO3':8,'PSSA3':2.50,'SBSP3':4,'SLCE3':7,'VALE3':10,'VIVT3':5,'Caixa':14.25}
 
-income = {'POS':15,'Inflação':38,'PRE':44,'FundoDI':3}
+income = {'POS':15,'Inflação':38,'PRE':44,'FundoDI':3,'Caixa':3}
 
 small_caps = {'BPAC11':10,'ENEV3':4,'HBSA3':7,'IFCM3':5,'IFCM3':5,'JALL3':10,'KEPL3':12,'MYPK3':5,'PRIO3':12,'SIMH3':8,'TASA4':8,'TUPY3':11,'WIZC3':5}
 
@@ -58,6 +58,7 @@ class Basket_enquadramento_carteiras():
         planilha_controle = controle.iloc[:-5,[1,2,6,7,12,16,17,18]]
         planilha_controle['Conta'] = planilha_controle['Conta'].astype(str).apply(lambda x: '00'+ x).str[:-2]
         planilha_posicao = posicao.iloc[:-2,[0,4,13,14]]
+        planilha_posicao['Estratégia'] = planilha_posicao['Estratégia'].fillna('Outras')
         posicao = planilha_posicao.groupby(['Conta','Produto','Estratégia'])['Valor Líquido'].sum().reset_index()
         arquivo_final = pd.merge(planilha_controle,posicao,on='Conta',how='outer')
         return arquivo_final
@@ -124,11 +125,6 @@ class Basket_enquadramento_carteiras():
         self.basket['C/V'] = np.where(self.basket['Valor_compra_venda']>0,'C','V')
         self.basket['Validade']='DIA'
         self.basket['Conta'] = input_conta
-        st.dataframe(self.basket)
-        print("$#############$$$$$$$$$$$$$$#########################$$$$$$$$$$$$$")
-        print(self.basket['Valor R$'].sum())
-        print("$#############$$$$$$$$$$$$$$#########################$$$$$$$$$$$$$")
-        print(self.basket['Valor Líquido'].sum())
         self.basket = self.basket.rename(columns={'Cotação atual':'Preço'}).iloc[:,[0,7,6,4,9,8]]
 
         return self.basket

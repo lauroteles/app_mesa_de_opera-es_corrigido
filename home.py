@@ -72,7 +72,7 @@ colors_dark_brewers = ['#2c7bb6', '#abd9e9', '#ffffbf', '#fdae61', '#d7191c']
 equities = {'ARZZ3': 5,'ASAI3':6.50,'BBSE3':5,'CPFE3':5.50,'EGIE3':5.50,'HYPE3':8.00,'KEPL3':8.75,
             'LEVE3':5,'PRIO3':8,'PSSA3':2.50,'SBSP3':4,'SLCE3':7,'VALE3':10,'VIVT3':5,'Caixa':14.25}
 
-income = {'POS':15,'Inflação':38,'PRE':44,'FundoDI':3}
+income = {'POS':15,'Inflação':38,'PRE':44,'FundoDI':3,'Caixa':3}
 
 small_caps = {'BPAC11':10,'ENEV3':4,'HBSA3':7,'IFCM3':5,'IFCM3':5,'JALL3':10,'KEPL3':12,'MYPK3':5,'PRIO3':12,'SIMH3':8,'TASA4':8,'TUPY3':11,'WIZC3':5}
 
@@ -108,6 +108,7 @@ if selecionar == 'Carteiras':
             dados_finais = dados_finais.loc[dados_finais['Conta']==input_conta].iloc[:,[8,9,10]]
 
             patrimono_liquido_da_conta = dados_finais["Valor Líquido"].sum()
+
             trantrando_dados_controle = trantrando_dados_controle.loc[trantrando_dados_controle['Conta']==input_conta]
 
             carteira_modelo = inciando_programa.selecionando_modelo_de_carteira(trantrando_dados_controle,

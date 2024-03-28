@@ -31,7 +31,7 @@ selecionar = st.sidebar.radio('Selecione uma opção', paginas)
 
 #---------------------------------- 
 # Variaveis globais
-@st.cache_data(ttl='5m')     
+@st.cache_data(ttl='2m')     
 def le_excel(x,page,row):
     df = pd.read_excel(x,page,skiprows=row)
     return df
@@ -46,7 +46,7 @@ curva_de_inflacao = le_excel('Curva_inflação.xlsx',0,0)
 posicao_btg1 = le_excel('Posição.xlsx',0,0)
 planilha_controle1 = le_excel('controle.xlsx',0,0)
 co_admin = le_excel('Controle de Contratos - Carteiras Co-Administradas.xlsx',1,1)
-controle_psicao = le_excel('controle.xlsx',0,1)
+controle_psicao = le_excel('Controle de Contratos.xlsx',2,1)
 rentabilidade = le_excel('Rentabilidade (1).xlsx',0,0)
 bancos = le_excel('Limite Bancos 06_23.xlsx',0,1)
 

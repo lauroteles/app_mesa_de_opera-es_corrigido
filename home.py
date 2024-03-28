@@ -19,12 +19,13 @@ import pytz
 import divisao_de_operadores
 from divisao_de_operadores import Divisao_de_contas
 from divisao_guide import Guide_Divisao_contas
+from basket_geral import  Basket_geral
 
 t0 = time.perf_counter()
 
 st.set_page_config(layout='wide')
 
-paginas = 'Home','Carteiras','Produtos','Divisão de operadores','Carteiras Co Admin','Analitico','Análise Tecnica',
+paginas = 'Home','Carteiras','Produtos','Divisão de operadores','Carteiras Co Admin','Analitico','Análise Tecnica','Basket geral'
 selecionar = st.sidebar.radio('Selecione uma opção', paginas)
 
 
@@ -958,9 +959,53 @@ if selecionar == 'Carteiras Co Admin':
         st.dataframe(dados_agregados)
 
     print(controle_co_admin.info())        
-t1 = time.perf_counter()
+if selecionar == 'Basket geral':
+    if __name__=='__main__':
+        dia_e_hora = datetime.datetime.now().strftime("%d %m %Y")
+        inciando_programa = Basket_geral()
+        
+        carteira_equity = inciando_programa.criando_carteiras('Carteira_equity',equities)
+        carteira_income = inciando_programa.criando_carteiras('Carteira Income',income)
+        carteira_small = inciando_programa.criando_carteiras('Carteira Small',small_caps)
+        carteira_dividendos = inciando_programa.criando_carteiras('Carteira Dividendos',dividendos)
+        carteira_fii = inciando_programa.criando_carteiras('Carteira FII', fii)
+        carteira_conservadora = inciando_programa.criando_carteiras_hibridas('Carteira Conservadora',0.15,0.85)
+        carteira_moderada = inciando_programa.criando_carteiras_hibridas('Carteira Moderada',0.30,0.70)
+        carteira_arrojada = inciando_programa.criando_carteiras_hibridas('Carteira Arrojada',0.50,0.50)
 
-print(t1-t0)
+        dados_finais_1 = inciando_programa.juntando_arqeuivos(controle=controle_psicao,posicao=posicao_btg1)
+        trantrando_dados_controle = inciando_programa.tratamento_de_dados_controle(controle_psicao)
+
+        carteira_escolhida = st.sidebar.radio('Selecione a carteire',['INC','CON','MOD','ARR','EQT'])
+
+        if carteira_escolhida == 'INC':
+            carteira_modelo = carteira_income
+        elif carteira_escolhida == 'CON':
+            carteira_modelo = carteira_conservadora
+        elif carteira_escolhida == 'MOD':
+            carteira_modelo = carteira_moderada
+        elif carteira_escolhida == 'ARR':
+            carteira_modelo = carteira_arrojada
+        elif carteira_escolhida == 'EQT':
+            carteira_modelo = carteira_equity    
+
+
+        basket_geral = inciando_programa.basket_geral(dados_finais=dados_finais_1,pl_original=pl_original,
+                                                      carteira=carteira_escolhida,carteira_modelo=carteira_modelo)
+        st.dataframe(basket_geral)
+        #def basket_geral(dados_finais,pl_original,carteira,carteira_modelo):
+           
+        output8 = io.BytesIO()
+        with pd.ExcelWriter(output8, engine='xlsxwriter') as writer:basket_geral.to_excel(writer,sheet_name=f'Basket__{carteira_escolhida}__{dia_e_hora}',index=False)
+        output8.seek(0)
+        st.download_button(type='primary',label="Basket Download",data=output8,file_name=f'Basket___{carteira_escolhida}__{dia_e_hora}.xlsx',key='download_button')
+
+
+
+
+    t1 = time.perf_counter()
+
+    print(t1-t0)
 
 
 

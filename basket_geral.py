@@ -17,7 +17,6 @@ import xlsxwriter as xlsxwriter
 import datetime
 import time
 import pytz
-import divisao_de_operadores
 
 
 colors_dark_rainbow = ['#9400D3', '#4B0082', '#0000FF', '#00FF00', '#FFFF00',
@@ -36,28 +35,8 @@ dividendos = {'TAEE11':9,'VIVT3':12,'BBSE3':17, 'ABCB4':16,' VBBR3':15,' CPLE6':
 fii = {'BTLG11':22.30,'Caixa':6,'HGLG11':22.30,'KNCA11':7.25,'MALL11':7.75,'PLCR11':13.57,'RURA11':7.26,'TRXF11':13.57}
 
 lista_acoes_em_caixa = [ 'ARZZ3', 'ASAI3', 'BBSE3', 'CPFE3', 'EGIE3','HYPE3', 'KEPL3', 'LEVE3', 'PRIO3', 'PSSA3', 'SBSP3', 'VIVT3', 'SLCE3', 'VALE3','BOVA11']
-@st.cache_data(ttl='5m')     
-def le_excel(x,page,row):
-    df = pd.read_excel(x,page,skiprows=row)
-    return df
 
-pl_original = le_excel('PL Total.xlsx',0,0)
-controle_original = le_excel('controle.xlsx',0,0)
-saldo_original = le_excel('Saldo.xlsx',0,0)
-posicao_original = le_excel('Posição.xlsx',0,0)
-produtos_original = le_excel('Produtos.xlsx',0,0)
-cura_original = le_excel('Curva_comdinheiro.xlsx',0,0)
-curva_de_inflacao = le_excel('Curva_inflação.xlsx',0,0)
-posicao_btg1 = le_excel('Posição.xlsx',0,0)
-planilha_controle1 = le_excel('controle.xlsx',0,0)
-co_admin = le_excel('Controle de Contratos - Carteiras Co-Administradas.xlsx',1,1)
-controle_psicao = le_excel('controle.xlsx',0,1)
-rentabilidade = le_excel('Rentabilidade (1).xlsx',0,0)
-bancos = le_excel('Limite Bancos 06_23.xlsx',0,1)
-
-
-
-class Basket_enquadramento_carteiras():
+class Basket_geral():
     def __init__(self):
         print("O programa iniciou")
 
@@ -115,200 +94,111 @@ class Basket_enquadramento_carteiras():
             print('A carteira nao foi reconhecida')                      
         return carteira_utilizada
     
-    def criando_graficos_posicao_atual(self,dados_finais):
-        self.posicao_atual_da_carteira_grafico = go.Figure(data=[go.Pie(
-                labels=dados_finais['Produto'],
-                values=dados_finais['Valor Líquido'],
-                hole=0.4,
-                textinfo='label+percent',
-                insidetextorientation='radial',
-                textposition='outside',
-                marker=dict(colors=colors_dark_brewers)
-                )])
-        return st.plotly_chart(self.posicao_atual_da_carteira_grafico)
     
-    
-    def criando_graficos_posicao_ideal(self,carteira_modelo):
-        posicao_ideal_da_carteira = go.Figure(data=[go.Pie(labels=carteira_modelo['Ativo'],
-                                        values=carteira_modelo['Valor R$'],
-                                        hole=0.4,
-                                        textinfo='label+percent',
-                                        insidetextorientation='radial',
-                                        textposition='outside',
-                                        marker=dict(colors=colors_dark_rainbow)
-                                        )])
-        return st.plotly_chart(posicao_ideal_da_carteira)    
-    
-    def criacao_basket(self,carteira_modelo,dados_finais,input_conta):
-        carteira_modelo = carteira_modelo[(carteira_modelo['Ativo'].str.contains('3'))|(carteira_modelo['Ativo'].str.contains('11'))]
-        dados_finais = dados_finais[dados_finais['Produto'].str.contains('3')]
-        basket = pd.merge(carteira_modelo.iloc[:,[0,2]],dados_finais.iloc[:,[0,2]],left_on='Ativo',right_on='Produto',how='outer')
+    def basket_geral(self,dados_finais,pl_original,carteira,carteira_modelo):
+        arquivo_com_pl = pd.merge(dados_finais,pl_original,on='Conta',how='outer')
+
+        basket_geral_con = arquivo_com_pl[(arquivo_com_pl['Carteira']==carteira)&(arquivo_com_pl['Estratégia']=='Renda Variável')]
+        basket_geral_con = basket_geral_con.merge(carteira_modelo,left_on='Produto',right_on='Ativo',how='outer')
+        basket_geral_con['Porcentagem da carteira'] = basket_geral_con['Valor Líquido']/basket_geral_con['Valor']
+        basket_geral_con['Valor R$ Ideal'] = round(basket_geral_con['Proporção']*basket_geral_con['Valor'],2)
+        basket_geral_con['Valor R$ da carteira'] = basket_geral_con['Porcentagem da carteira']*basket_geral_con['Valor']
+        basket_geral_con['Diferença VI X VC'] = basket_geral_con['Valor R$ Ideal']-basket_geral_con['Valor R$ da carteira']
+        basket_geral_con = basket_geral_con[basket_geral_con['Status']=='Ativo']
+
+        basket_geral_con = basket_geral_con.iloc[:,[0,1,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18]]
+        basket_geral_con['BOVA11'] = (0.015*basket_geral_con['Valor']).drop_duplicates()
+        ativo_novo = basket_geral_con.iloc[:,[0,1,3,4,5,6,7,8,9,10,11,12,13,15,16,17]].rename(columns={'BOVA11':'Valor R$ Ideal'})
+        ativo_novo['Valor R$ Ideal'] = ativo_novo['Valor R$ Ideal'].fillna(0.00)
+        ativo_novo = ativo_novo[ativo_novo['Valor R$ Ideal']!=0.00]
+        ativo_novo['Produto'] = 'BOVA11'
+        ativo_novo['Proporção'] = 'BOVA11'
+        ativo_novo[['Porcentagem da carteira','Valor R$ da carteira']] = ''
+        ativo_novo['Diferença VI X VC'] = ativo_novo['Valor R$ Ideal']
+
+
+        basket_geral_con = pd.concat([basket_geral_con,ativo_novo]).drop(columns='BOVA11')
+
+
         precos_de_mercado = []
         for ativo in lista_acoes_em_caixa:
-                ticker = yf.Ticker(ativo +'.SA')
-                preco_atual = ticker.history(period='2m')['Close'].iloc[-1]
-            
-                precos_de_mercado.append([ativo,preco_atual])
+                    ticker = yf.Ticker(ativo +'.SA')
+                    preco_atual = ticker.history(period='2m')['Close'].iloc[-1]
+                
+                    precos_de_mercado.append([ativo,preco_atual])
 
         cotacoes_momento = pd.DataFrame(precos_de_mercado,columns =['Ativo','Cotação atual'])   
-        self.basket = basket.merge(cotacoes_momento,on='Ativo',how='outer').fillna(0)
-        self.basket['Valor_compra_venda'] = round(self.basket['Valor R$']-self.basket['Valor Líquido'],2)
-        self.basket['Quantidade'] = round(self.basket['Valor_compra_venda']/self.basket['Cotação atual'],0).abs()
-        self.basket['C/V'] = np.where(self.basket['Valor_compra_venda']>0,'C','V')
-        self.basket['Validade']='DIA'
-        self.basket['Conta'] = input_conta
-        self.basket = self.basket.rename(columns={'Cotação atual':'Preço'})#.iloc[:,[0,7,6,4,9,8]]
+        basket = basket_geral_con.merge(cotacoes_momento,left_on='Produto',right_on='Ativo',how='outer').fillna(0)
+        basket['Quantidade'] = round(basket['Diferença VI X VC']/basket['Cotação atual'],0).abs()
+        basket['C/V'] = np.where(basket['Diferença VI X VC']>0,'C','V')
+        basket['Validade']='DIA'
+        basket = basket.rename(columns={'Cotação atual':'Preço'}).iloc[:-6,[7,20,19,18,1,21,4,5,6,16]].dropna().rename(columns={'Produto':'Ativo'})
+        return basket
 
-        return self.basket
-    
-    def checando_estrategia(self,dados_finais):
-        self.comparar_posicao_cliete_x_estrategia = posicao_atual_da_carteira_grafico = go.Figure(data=[go.Pie(
-                labels=dados_finais['Estratégia'],
-                values=dados_finais['Valor Líquido'],
-                hole=0.4,
-                textinfo='label+percent',
-                insidetextorientation='radial',
-                textposition='outside'
-                )])
-        return st.plotly_chart(self.comparar_posicao_cliete_x_estrategia)
-    
-    def grafico_rentabilidade(self,rentabilidade,input_conta):
-        rentabilidade = rentabilidade.iloc[:,[0,2,4,6,8,10,12,14,16,18,20,22,24]]
-        rentabilidade = rentabilidade[rentabilidade['Periodo']==input_conta]
-        coluna_rentabilidade = rentabilidade.columns[-1]
-        rentabilidade = rentabilidade.transpose().reset_index().rename(columns={'index':'Periodo'}).drop(0)
-        rentabilidade['Rentabilidade acumulada'] = ((1 + rentabilidade.iloc[:,-1]/100).cumprod(axis=0)-1)*10000
 
-        grafico_retabilidade = px.line(y=rentabilidade['Rentabilidade acumulada'],x=rentabilidade['Periodo'],title='Rentabilidade')
-        return  st.plotly_chart(grafico_retabilidade)
     
 
-if __name__=='__main__':
-    dia_e_hora = datetime.datetime.now()
-    inciando_programa = Basket_enquadramento_carteiras()
+
     
-    carteira_equity = inciando_programa.criando_carteiras('Carteira_equity',equities)
-    carteira_income = inciando_programa.criando_carteiras('Carteira Income',income)
-    carteira_small = inciando_programa.criando_carteiras('Carteira Small',small_caps)
-    carteira_dividendos = inciando_programa.criando_carteiras('Carteira Dividendos',dividendos)
-    carteira_fii = inciando_programa.criando_carteiras('Carteira FII', fii)
-    carteira_conservadora = inciando_programa.criando_carteiras_hibridas('Carteira Conservadora',0.15,0.85)
-    carteira_moderada = inciando_programa.criando_carteiras_hibridas('Carteira Moderada',0.30,0.70)
-    carteira_arrojada = inciando_programa.criando_carteiras_hibridas('Carteira Arrojada',0.50,0.50)
 
-    dados_finais = inciando_programa.juntando_arqeuivos(controle=controle_psicao,posicao=posicao_btg1)
-    trantrando_dados_controle = inciando_programa.tratamento_de_dados_controle(controle_psicao)
+# if __name__=='__main__':
+#     dia_e_hora = datetime.datetime.now()
+#     inciando_programa = Basket_enquadramento_carteiras()
+    
+#     carteira_equity = inciando_programa.criando_carteiras('Carteira_equity',equities)
+#     carteira_income = inciando_programa.criando_carteiras('Carteira Income',income)
+#     carteira_small = inciando_programa.criando_carteiras('Carteira Small',small_caps)
+#     carteira_dividendos = inciando_programa.criando_carteiras('Carteira Dividendos',dividendos)
+#     carteira_fii = inciando_programa.criando_carteiras('Carteira FII', fii)
+#     carteira_conservadora = inciando_programa.criando_carteiras_hibridas('Carteira Conservadora',0.15,0.85)
+#     carteira_moderada = inciando_programa.criando_carteiras_hibridas('Carteira Moderada',0.30,0.70)
+#     carteira_arrojada = inciando_programa.criando_carteiras_hibridas('Carteira Arrojada',0.50,0.50)
 
-
-    arquivo_com_pl = pd.merge(dados_finais,pl_original,on='Conta',how='outer')
-
-    basket_geral_con = arquivo_com_pl[(arquivo_com_pl['Carteira']=='CON')&(arquivo_com_pl['Estratégia']=='Renda Variável')]
-    basket_geral_con = basket_geral_con.merge(carteira_conservadora,left_on='Produto',right_on='Ativo',how='outer')
-    basket_geral_con['Porcentagem da carteira'] = basket_geral_con['Valor Líquido']/basket_geral_con['Valor']
-    basket_geral_con['Valor R$ Ideal'] = round(basket_geral_con['Proporção']*basket_geral_con['Valor'],2)
-    basket_geral_con['Valor R$ da carteira'] = basket_geral_con['Porcentagem da carteira']*basket_geral_con['Valor']
-    basket_geral_con['Diferença VI X VC'] = basket_geral_con['Valor R$ Ideal']-basket_geral_con['Valor R$ da carteira']
-    basket_geral_con = basket_geral_con.iloc[:,[0,1,3,4,8,9,10,12,13,14,15,16,17,18]]
-    basket_geral_con['BOVA11'] = (0.015*basket_geral_con['Valor']).drop_duplicates()
-    ativo_novo = basket_geral_con.iloc[:,[0,1,2,3,4,5,6,7,8,9,10,12,13,14]].rename(columns={'BOVA11':'Valor R$ Ideal'})
-    ativo_novo = ativo_novo.dropna()
-    ativo_novo['Produto'] = 'BOVA11'
-    ativo_novo['Proporção'] = 'BOVA11'
-    ativo_novo[['Porcentagem da carteira','Valor R$ da carteira']] = ''
-    ativo_novo['Diferença VI X VC'] = ativo_novo['Valor R$ Ideal']
+#     dados_finais = inciando_programa.juntando_arqeuivos(controle=controle_psicao,posicao=posicao_btg1)
+#     trantrando_dados_controle = inciando_programa.tratamento_de_dados_controle(controle_psicao)
 
 
-    basket_geral_con = pd.concat([basket_geral_con,ativo_novo]).drop(columns='BOVA11')
+#     arquivo_com_pl = pd.merge(dados_finais,pl_original,on='Conta',how='outer')
+
+#     basket_geral_con = arquivo_com_pl[(arquivo_com_pl['Carteira']=='CON')&(arquivo_com_pl['Estratégia']=='Renda Variável')]
+#     basket_geral_con = basket_geral_con.merge(carteira_conservadora,left_on='Produto',right_on='Ativo',how='outer')
+#     basket_geral_con['Porcentagem da carteira'] = basket_geral_con['Valor Líquido']/basket_geral_con['Valor']
+#     basket_geral_con['Valor R$ Ideal'] = round(basket_geral_con['Proporção']*basket_geral_con['Valor'],2)
+#     basket_geral_con['Valor R$ da carteira'] = basket_geral_con['Porcentagem da carteira']*basket_geral_con['Valor']
+#     basket_geral_con['Diferença VI X VC'] = basket_geral_con['Valor R$ Ideal']-basket_geral_con['Valor R$ da carteira']
+#     basket_geral_con = basket_geral_con[basket_geral_con['Status']=='Ativo']
+
+#     basket_geral_con = basket_geral_con.iloc[:,[0,1,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18]]
+#     basket_geral_con['BOVA11'] = (0.015*basket_geral_con['Valor']).drop_duplicates()
+#     ativo_novo = basket_geral_con.iloc[:,[0,1,3,4,5,6,7,8,9,10,11,12,13,15,16,17]].rename(columns={'BOVA11':'Valor R$ Ideal'})
+#     ativo_novo['Valor R$ Ideal'] = ativo_novo['Valor R$ Ideal'].fillna(0.00)
+#     ativo_novo = ativo_novo[ativo_novo['Valor R$ Ideal']!=0.00]
+#     ativo_novo['Produto'] = 'BOVA11'
+#     ativo_novo['Proporção'] = 'BOVA11'
+#     ativo_novo[['Porcentagem da carteira','Valor R$ da carteira']] = ''
+#     ativo_novo['Diferença VI X VC'] = ativo_novo['Valor R$ Ideal']
 
 
-    precos_de_mercado = []
-    for ativo in lista_acoes_em_caixa:
-                ticker = yf.Ticker(ativo +'.SA')
-                preco_atual = ticker.history(period='2m')['Close'].iloc[-1]
+#     basket_geral_con = pd.concat([basket_geral_con,ativo_novo]).drop(columns='BOVA11')
+
+
+#     precos_de_mercado = []
+#     for ativo in lista_acoes_em_caixa:
+#                 ticker = yf.Ticker(ativo +'.SA')
+#                 preco_atual = ticker.history(period='2m')['Close'].iloc[-1]
             
-                precos_de_mercado.append([ativo,preco_atual])
+#                 precos_de_mercado.append([ativo,preco_atual])
 
-    cotacoes_momento = pd.DataFrame(precos_de_mercado,columns =['Ativo','Cotação atual'])   
-    basket = basket_geral_con.merge(cotacoes_momento,on='Ativo',how='outer').fillna(0)
-    basket['Quantidade'] = round(basket['Valor_compra_venda']/basket['Cotação atual'],0).abs()
-    basket['C/V'] = np.where(basket['Valor_compra_venda']>0,'C','V')
-    basket['Validade']='DIA'
-    basket['Conta'] = basket_geral_con['Conta']
-    basket = basket.rename(columns={'Cotação atual':'Preço'})#.iloc[:,[0,7,6,4,9,8]]
-
-    st.dataframe(basket_geral_con)
-    st.dataframe(arquivo_com_pl)
+#     cotacoes_momento = pd.DataFrame(precos_de_mercado,columns =['Ativo','Cotação atual'])   
+#     basket = basket_geral_con.merge(cotacoes_momento,left_on='Produto',right_on='Ativo',how='outer').fillna(0)
+#     basket['Quantidade'] = round(basket['Diferença VI X VC']/basket['Cotação atual'],0).abs()
+#     basket['C/V'] = np.where(basket['Diferença VI X VC']>0,'C','V')
+#     basket['Validade']='DIA'
+#     basket = basket.rename(columns={'Cotação atual':'Preço'}).iloc[:-6,[7,20,19,18,1,21,4,5,6,16]].dropna().rename(columns={'Produto':'Ativo'})
 
 
 
+#     st.dataframe(basket)
 
 
 
-
-
-
-
-
-
-    input_conta = st.sidebar.text_input('Escreva o número da conta : ')
-    
-    dados_finais = dados_finais.loc[dados_finais['Conta']==input_conta].iloc[:,[8,9,10]]
-
-    patrimono_liquido_da_conta = dados_finais["Valor Líquido"].sum()
-
-    trantrando_dados_controle = trantrando_dados_controle.loc[trantrando_dados_controle['Conta']==input_conta]
-
-    carteira_modelo = inciando_programa.selecionando_modelo_de_carteira(trantrando_dados_controle,
-                                                                        carteira_arrojada,carteira_conservadora,carteira_moderada,
-                                                                        carteira_income,carteira_equity,carteira_small,carteira_dividendos,carteira_fii)
-    
-    pl_manual = st.sidebar.number_input('Escolher valor de PL',key='Adicionar pl manual',value= patrimono_liquido_da_conta,format="%.2f")
-
-    if pl_manual is None:
-        carteira_modelo['Valor R$'] = carteira_modelo['Proporção']*patrimono_liquido_da_conta
-    else:    
-        carteira_modelo['Valor R$'] = carteira_modelo['Proporção']*pl_manual
-    
-    carteira_modelo['Proporção'] = carteira_modelo['Proporção'].map(lambda x: f"{x * 100:,.2f}  %")
-
-    try:
-        basket_ = inciando_programa.criacao_basket(carteira_modelo=carteira_modelo,dados_finais=dados_finais,input_conta=input_conta)
-    except:
-        pass
-
-    st.text(f'Patrimônio Líquido da carteira :   {dados_finais["Valor Líquido"].sum():,.2f}')
-            
-    try:        
-        output4 = io.BytesIO()
-        with pd.ExcelWriter(output4, engine='xlsxwriter') as writer:basket_.to_excel(writer,sheet_name=f'Basket__{input_conta}___',index=False)
-        output4.seek(0)
-        st.download_button(type='primary',label="Basket Download",data=output4,file_name=f'basket_{input_conta}__{dia_e_hora}.xlsx',key='download_button')
-    except:
-        pass    
-    
-    col1,col2 = st.columns(2)
-    with col1:
-        if st.toggle('Enquadramento da carteira'):
-            grafico_estrategia = inciando_programa.checando_estrategia(dados_finais)
-        else:                    
-            posicao_atual_grafico = inciando_programa.criando_graficos_posicao_atual(dados_finais)
-
-        st.dataframe(dados_finais.sort_values(by='Produto'),use_container_width=True)
-        st.dataframe(trantrando_dados_controle.unstack(),use_container_width=True)
-        basket_compra = basket_[basket_['C/V']=='C']
-        basket_compra['Valor'] = basket_compra['Quantidade']*basket_compra['Preço']
-        basket_venda = basket_[basket_['C/V']=='V']
-        basket_venda['Valor'] = basket_venda['Quantidade']*basket_venda['Preço']
-        st.warning(f' O saldo Nescessario para Compra : {basket_compra["Valor"].sum():,.2f}')
-        st.warning(f' O saldo Gerado pela Venda : {basket_venda["Valor"].sum():,.2f}')
-        st.dataframe(basket_)
-
-    with col2:
-
-        grafico_posicao_ideal = inciando_programa.criando_graficos_posicao_ideal(carteira_modelo=carteira_modelo)
-        st.text("")
-        st.text("")
-        st.text("")
-        st.dataframe(carteira_modelo.sort_values(by='Ativo'),use_container_width=True)
-
-        grafico_rentabilidade = inciando_programa.grafico_rentabilidade(rentabilidade,input_conta)
